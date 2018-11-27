@@ -1,0 +1,7 @@
+{
+	"Instance":"percomTest",
+	"Service":"_ssh._tcp.local",
+	"SRV":{"port":10000,"weigth":0,"priority":0},
+	"TXT":["username=pi","pwd=testtest"],
+	"A":{"name":"percomTest.local","data":""}
+}
