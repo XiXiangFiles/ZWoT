@@ -101,7 +101,7 @@ mdns.on('query',function(res){
 	});
 	promise.then(function(full){
 		if(full.answers.length>0 && full.additionals !=undefined){	
-			mdns.respond({answers:full.answers,additionals:full.addtionals});
+			mdns.respond({answers:full.answers,additionals:full.additionals});
 			console.log({answers:full.answers,additionals:full.additionals});
 		}else if(full.answers.length>0 && full.additionals ==undefined){	
 			mdns.respond({answers:full.answers});
