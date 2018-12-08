@@ -36,10 +36,12 @@ mdns.on('response',function (res){
 				console.log({name:name, type:'SRV'});
 				mdns.query([{name:name, type:'SRV'}]);
 			}
+			/*
 			if(full[i]=='TXT'){
 				mdns.query([{name:name, type:'TXT'}]);
 				console.log({name:name, type:'TXT'});
 			}
+			*/
 		}
 	});
 });
