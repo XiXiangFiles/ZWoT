@@ -1,6 +1,7 @@
 const mdns=require('multicast-dns')();
 let queryque=new Set();
 mdns.on('response',function (res){
+	console.log(res.answers);
 	let promise=new Promise(function(resolve,reject){
 		let arr=[];
 		if(res.answers.map(function(answer){return answer.type}).includes('SRV')){
@@ -29,20 +30,17 @@ mdns.on('response',function (res){
 	});
 	promise.then(function(full){
 		let name=full[0];
-		console.log("name = "+name)
 		for(let i = 1 ; i< full.length ; i++){
 			if(full[i]=='SRV'){
 				queryque.add(name);
 				console.log({name:name, type:'SRV'});
 				mdns.query([{name:name, type:'SRV'}]);
 			}
-			/*
 			if(full[i]=='TXT'){
 				mdns.query([{name:name, type:'TXT'}]);
 				console.log({name:name, type:'TXT'});
-			}
-			*/
+			}	
 		}
 	});
 });
-mdns.query([{name:'_ssh._tcp.local', type:'PTR'}]);
+mdns.query([{name:'_services._dns-sd._udp.local', type:'PTR'}]);

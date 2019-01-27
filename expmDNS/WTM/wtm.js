@@ -1,12 +1,7 @@
 const fs=require('fs');
-const color=require('colors');
-const http = require('http');
 const datetime=require('../node_modules/node-datetime');
 const decode = require('../node_modules/urldecode');
 const dirTree=require('../node_modules/directory-tree');
-let config;
-let file=fs.readFileSync('../config.json','utf8');
-config=JSON.parse(file);
 function wtm(){
 	function mkdir(path){
 		try{
@@ -16,6 +11,8 @@ function wtm(){
 	}
 	this.mkdirFloder= function(){
 		return new Promise(function(resolve){
+			let file=fs.readFileSync('../config.json','utf8');
+			let config=JSON.parse(file);
 			mkdir('root');
 			config.folder.forEach(function(floder){
 				mkdir(`root/${floder}`);
@@ -28,6 +25,8 @@ function wtm(){
 			function generateLink(name){
 				return str='Link:<'+name+'/>; rel="'+name+'"\n';
 			}
+			let file=fs.readFileSync('../config.json','utf8');
+			let config=JSON.parse(file);
 			let dt = datetime.create();
 			let profile={}
 			let Links="";
@@ -91,6 +90,8 @@ function wtm(){
 				}
 				return allService;
 			}
+			let file=fs.readFileSync('../config.json','utf8');
+			let config=JSON.parse(file);
 			let services=new Map();
 			let servicesWriteFile=new Map();
 			let tree = dirTree('root',{ extensions: /.json$/ },function(path,item){
