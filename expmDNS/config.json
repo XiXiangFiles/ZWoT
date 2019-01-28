@@ -1,6 +1,6 @@
 {
 	"Instance":"percomTest",
-	"A":{"name":"percomTest.local","data":"192.168.43.204"},
+	"A":{"name":"percomTest.local","data":"192.168.4.222"},
 	"folder":["model","properties","actions","things","subscription","type","product","help","ui","custom"],
 	"WoTs":{
 		"percomTest":{

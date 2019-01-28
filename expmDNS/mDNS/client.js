@@ -43,4 +43,4 @@ mdns.on('response',function (res){
 		}
 	});
 });
-mdns.query([{name:'_transfer._sub._ssh._tcp.local', type:'PTR'}]);
+mdns.query([{name:'_services._dns-sd._udp.local', type:'PTR'}]);
