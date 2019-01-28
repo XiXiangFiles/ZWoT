@@ -13,9 +13,9 @@ function wtm(){
 		return new Promise(function(resolve){
 			let file=fs.readFileSync('../config.json','utf8');
 			let config=JSON.parse(file);
-			mkdir('root');
+			mkdir('../public/root');
 			config.folder.forEach(function(floder){
-				mkdir(`root/${floder}`);
+				mkdir(`../public/root/${floder}`);
 			});
 			resolve();
 		});
@@ -38,8 +38,8 @@ function wtm(){
 			for(let i=0 ; i< config.folder.length; i++ )
 				Links+=generateLink(config.folder[i]);
 
-			fs.writeFileSync(`root/links`,Links, function (err) {});
-			fs.writeFileSync(`root/${config.Instance}.json`,JSON.stringify(profile), function (err) {});
+			fs.writeFileSync(`../public/root/links`,Links, function (err) {});
+			fs.writeFileSync(`../public/root/${config.Instance}.json`,JSON.stringify(profile), function (err) {});
 			
 			for(let i=0 ; i<Object.keys(config.WoTs).length;i++){
 				if(Object.keys(config.WoTs)[i]!==config.Instance){
@@ -50,14 +50,14 @@ function wtm(){
 					obj.description=config.WoTs[Object.keys(config.WoTs)[i]].description;
 					obj.values={};
 
-					mkdir(`${config.WoTs[Object.keys(config.WoTs)[i]].path}`);
-					mkdir(`${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}`);
-					mkdir(`${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/${config.WoTs[Object.keys(config.WoTs)[i]].id}`);
+					mkdir(`../public/${config.WoTs[Object.keys(config.WoTs)[i]].path}`);
+					mkdir(`../public/${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}`);
+					mkdir(`../public/${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/${config.WoTs[Object.keys(config.WoTs)[i]].id}`);
 					try{
-						fs.writeFileSync(`${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/links`,
+						fs.writeFileSync(`../public/${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/links`,
 							link,(err)=>{}
 						);
-						fs.writeFileSync(`${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/${config.WoTs[Object.keys(config.WoTs)[i]].id}/${config.Instance}.json`,
+						fs.writeFileSync(`../public/${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/${config.WoTs[Object.keys(config.WoTs)[i]].id}/${config.Instance}.json`,
 							JSON.stringify(obj),(err)=>{}
 						);
 					}catch(e){
@@ -127,41 +127,41 @@ function wtm(){
 				floder=serviceEntry[0];
 				switch(floder){
 					case 'properties':
-						model.properties.resource.push(JSON.parse(fs.readFileSync(`root/properties/${path}`,'utf8',function(err){})));
+						model.properties.resource.push(JSON.parse(fs.readFileSync(`../public/root/properties/${path}`,'utf8',function(err){})));
 					break;
 					case 'actions':
-						model.actions.resource.push(JSON.parse(fs.readFileSync(`root/actions/${path}`,'utf8',function(err){})));
+						model.actions.resource.push(JSON.parse(fs.readFileSync(`../public/root/actions/${path}`,'utf8',function(err){})));
 					break;
 					case 'custom':
-						model.custom.resource.push(JSON.parse(fs.readFileSync(`root/custom/${path}`,'utf8',function(err){})));
+						model.custom.resource.push(JSON.parse(fs.readFileSync(`../public/root/custom/${path}`,'utf8',function(err){})));
 					break;
 				}
 			}
-			fs.writeFileSync(`root/model/${config.Instance}.json`,JSON.stringify(model),(err)=>{});
-			fs.writeFileSync(`root/properties/links`,`Link:http://${config.A.data}/properties;rel="type"`,(err)=>{});
-			fs.writeFileSync(`root/properties/${config.Instance}.json`,JSON.stringify(model.properties.resource),(err)=>{});
-			fs.writeFileSync(`root/actions/links`,`Link:http://${config.A.data}/actions;rel="type"`,(err)=>{});
-			fs.writeFileSync(`root/actions/${config.Instance}.json`,JSON.stringify(model.actions.resource),(err)=>{});
-			fs.writeFileSync(`root/custom/links`,`Link:http://${config.A.data}/custom;rel="type"`,(err)=>{});
-			fs.writeFileSync(`root/custom/${config.Instance}.json`,JSON.stringify(model.custom.resource),(err)=>{});
+			fs.writeFileSync(`../public/root/model/${config.Instance}.json`,JSON.stringify(model),(err)=>{});
+			fs.writeFileSync(`../public/root/properties/links`,`Link:http://${config.A.data}/properties;rel="type"`,(err)=>{});
+			fs.writeFileSync(`../public/root/properties/${config.Instance}.json`,JSON.stringify(model.properties.resource),(err)=>{});
+			fs.writeFileSync(`../public/root/actions/links`,`Link:http://${config.A.data}/actions;rel="type"`,(err)=>{});
+			fs.writeFileSync(`../public/root/actions/${config.Instance}.json`,JSON.stringify(model.actions.resource),(err)=>{});
+			fs.writeFileSync(`../public/root/custom/links`,`Link:http://${config.A.data}/custom;rel="type"`,(err)=>{});
+			fs.writeFileSync(`../public/root/custom/${config.Instance}.json`,JSON.stringify(model.custom.resource),(err)=>{});
 			
 			let properties=classify(model.properties.resource);
 			let actions=classify(model.actions.resource);
 			let custom=classify(model.custom.resource);
 			for(let j = 0 ; j< properties.length ;j++){
 				let obj=properties[j];
-				fs.writeFileSync(`root/properties/${obj[Object.keys(properties[j])][j].name}/${config.Instance}.json`,JSON.stringify(obj[Object.keys(properties[j])][j]),(err)=>{}); 	
-				fs.writeFileSync(`root/properties/${obj[Object.keys(properties[j])][j].name}/links`,`Link:http://${config.A.data}/properties/${obj[Object.keys(properties[j])][j].name};rel="type"`)
+				fs.writeFileSync(`../public/root/properties/${obj[Object.keys(properties[j])][j].name}/${config.Instance}.json`,JSON.stringify(obj[Object.keys(properties[j])][j]),(err)=>{}); 	
+				fs.writeFileSync(`../public/root/properties/${obj[Object.keys(properties[j])][j].name}/links`,`Link:http://${config.A.data}/properties/${obj[Object.keys(properties[j])][j].name};rel="type"`)
 			}
 			for(j = 0 ; j< actions.length ;j++){
 				let obj=actions[j];
-				fs.writeFileSync(`root/actions/${obj[Object.keys(actions[j])][j].name}/${config.Instance}.json`,JSON.stringify(obj[Object.keys(actions[j])][j]),(err)=>{}); 	
-				fs.writeFileSync(`root/actions/${obj[Object.keys(actions[j])][j].name}/links`,`Link:http://${config.A.data}/actions/${obj[Object.keys(actions[j])][j].name};rel="type"`)
+				fs.writeFileSync(`../public/root/actions/${obj[Object.keys(actions[j])][j].name}/${config.Instance}.json`,JSON.stringify(obj[Object.keys(actions[j])][j]),(err)=>{}); 	
+				fs.writeFileSync(`../public/root/actions/${obj[Object.keys(actions[j])][j].name}/links`,`Link:http://${config.A.data}/actions/${obj[Object.keys(actions[j])][j].name};rel="type"`)
 			}
 			for(j = 0 ; j< custom.length ;j++){
 				let obj=custom[j];
-				fs.writeFileSync(`root/custom/${obj[Object.keys(custom[j])][j].name}/${config.Instance}.json`,JSON.stringify(obj[Object.keys(custom[j])][j]),(err)=>{}); 	
-				fs.writeFileSync(`root/custom/${obj[Object.keys(custom[j])][j].name}/links`,`Link:http://${config.A.data}/custom/${obj[Object.keys(custom[j])][j].name};rel="type"`)
+				fs.writeFileSync(`../public/root/custom/${obj[Object.keys(custom[j])][j].name}/${config.Instance}.json`,JSON.stringify(obj[Object.keys(custom[j])][j]),(err)=>{}); 	
+				fs.writeFileSync(`../public/root/custom/${obj[Object.keys(custom[j])][j].name}/links`,`Link:http://${config.A.data}/custom/${obj[Object.keys(custom[j])][j].name};rel="type"`)
 			}
 			resolve();
 		});
