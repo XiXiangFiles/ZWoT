@@ -105,10 +105,10 @@ function wtm(){
 			let tree = dirTree(`${rootPath}root`,{ extensions: /.json$/ },function(path,item){
 				dir.add(path.path);
 				let splitPath=path.path.split('/');
-				if(splitPath.length > 3){
-					let serviceName=splitPath[1]
-					let content=splitPath[2];
-					for(let i=3 ;i<splitPath.length ; i++ ){
+				if(splitPath.length > 4){
+					let serviceName=splitPath[2]
+					let content=splitPath[3];
+					for(let i=4 ;i<splitPath.length ; i++ ){
 						content+=":"+splitPath[i];
 					}
 					services.set(serviceName,content);
@@ -133,17 +133,19 @@ function wtm(){
 			for(let j=0 ; j< services.size; j++){
 				let serviceEntry = service.next().value;
 				let path=serviceEntry[1].replace(/:/gi,'/');
-				floder=serviceEntry[0];
+				floder=serviceEntry[1].split(":");
+				floder=serviceEntry[0]
 				switch(floder){
 					case 'properties':
+						console.log(`${rootPath}root/${path}`);
 						model.properties.resource.push(JSON.parse(fs.readFileSync(`${rootPath}root/properties/${path}`,'utf8',function(err){})));
-					break;
+						break;
 					case 'actions':
 						model.actions.resource.push(JSON.parse(fs.readFileSync(`${rootPath}root/actions/${path}`,'utf8',function(err){})));
-					break;
+						break;
 					case 'custom':
 						model.custom.resource.push(JSON.parse(fs.readFileSync(`${rootPath}root/custom/${path}`,'utf8',function(err){})));
-					break;
+						break;
 				}
 			}
 			fs.writeFileSync(`${rootPath}root/model/${config.Instance}.json`,JSON.stringify(model),(err)=>{});
@@ -174,6 +176,37 @@ function wtm(){
 			}
 			resolve(dir);
 		});
+	}
+	this.getWtm=function(path){
+		let configPath=path.configPath;
+		let rootPath=path.rootPath;
+		let dir=path.path;
+		let file=fs.readFileSync(`${configPath}config.json`,'utf8');
+		let config=JSON.parse(file);
+		if(path.path[path.path.length-1]!="/")
+			dir+=`/${config.Instance}.json`;
+		else
+			dir+=`${config.Instance}.json`;
+		try{
+			return fs.readFileSync(`${rootPath}root${dir}`,'utf8');
+		}catch(e){
+			return undefined;
+		}
+	}
+	this.getLink=function(path){
+		let configPath=path.configPath;
+		let rootPath=path.rootPath;
+		let dir=path.path;
+		if(path.path[path.path.length-1]!="/")
+			dir+=`/links`;
+		else
+			dir+=`links`;
+		
+		try{
+			return fs.readFileSync(`${rootPath}root${dir}`,'utf8');
+		}catch(e){
+			return undefined;
+		}
 	}
 }
 module.exports=new wtm;
