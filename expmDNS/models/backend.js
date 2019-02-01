@@ -1,10 +1,29 @@
+const wtm=require('../wtm');
 class backend{
 	navigateGet(req, res, next){
-		res.write("GET");
+		let path={};
+		path.configPath="";
+		path.rootPath="public/";
+		path.path=req.url;
+		let link=wtm.getLink(path);
+		let content=wtm.getWtm(path);
+		
+		if(link!== undefined)
+			res.writeHead("200",{'Link':link.split('\n')});
+		
+		console.log(link);
+		if(content!== undefined)
+			res.write(content);
+		else
+			res.writeHead("404",[]);
 		res.end();
 	}
 	navigatePut(req, res, next){
-		let put=['/','/properties','/things'];	
+		let path={};
+		path.configPath="";
+		path.rootPath="";
+		path.path=req.url;
+		let put=['/','properties','things'];	
 		if(req.url=='/'){
 			res.write(`${req.url}`);
 		}else{
@@ -36,7 +55,6 @@ class backend{
 				res.writeHead("404",[]);
 		}
 		res.end();
-
 	}
 	navigateDel(req, res, next){
 		let del=['actions','subscriptions'];
