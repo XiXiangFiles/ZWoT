@@ -137,7 +137,6 @@ function wtm(){
 				floder=serviceEntry[0]
 				switch(floder){
 					case 'properties':
-						console.log(`${rootPath}root/${path}`);
 						model.properties.resource.push(JSON.parse(fs.readFileSync(`${rootPath}root/properties/${path}`,'utf8',function(err){})));
 						break;
 					case 'actions':
