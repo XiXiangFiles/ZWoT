@@ -7,11 +7,8 @@ class backend{
 		path.path=req.url;
 		let link=wtm.getLink(path);
 		let content=wtm.getWtm(path);
-		
 		if(link!== undefined)
 			res.writeHead("200",{'Link':link.split('\n')});
-		
-		console.log(link);
 		if(content!== undefined)
 			res.write(content);
 		else
@@ -25,13 +22,13 @@ class backend{
 		path.path=req.url;
 		let put=['/','properties','things'];	
 		if(req.url=='/'){
-			res.write(`${req.url}`);
+			res.writeHead('204',['no content']);
 		}else{
 			let flag=true;
 			for(let i=1; i<put.length ; i++){
 				if(req.url.includes(put[i])){
 					flag=false;
-					res.write(`${req.url}`);
+					res.writeHead('204',{Location:`http://${res.req.headers.host}${req.url}`});
 				}
 			}
 			if(flag)
