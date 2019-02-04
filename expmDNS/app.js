@@ -43,6 +43,8 @@ obj.configPath="";
 obj.rootPath="public/";
 wtm.mkdirFloder(obj).then(function(){
 	wtm.init(obj).then(function(){
+		wtm.adjust(obj).then(function(path){
+		});
 	});
 });
 
