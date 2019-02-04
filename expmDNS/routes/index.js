@@ -6,22 +6,15 @@ const wtm=require('../wtm');
 let promise=new Promise(function(resolve){
 	let obj={};
 	obj.configPath="";
-	obj.rootPath="";
-	wtm.adjust(obj).then(function(path){
-		resolve(path)
-	})
+	obj.rootPath="public/";
+	resolve(wtm.getAllPath(obj));
 });
 promise.then(function(path){
 	path.forEach(function(path){
-		/*
-		let put=['/','properties','things'];
-		let post=['/','actions','properties','things'];
-		let del=['actions','subscriptions'];
-		*/
 		let dir=path.split('/');
 		let routerPath="/";
-		for(let i =0 ; i< dir.length ; i++){
-			if(i !==0 && i !== dir.length-1)
+		for(let i =1 ; i< dir.length ; i++){
+			if(i !==1 && i !== dir.length-1)
 				routerPath+=dir[i]+"/";
 		}
 		router.get(routerPath,beckend.navigateGet);
