@@ -234,6 +234,28 @@ function wtm(){
 			return undefined;
 		}	
 	}
+	this.postWtm=function(path){
+		let configPath=path.configPath;
+		let rootPath=path.rootPath;
+		let dir=path.path;
+		let data=path.data;
+		
+		let file=fs.readFileSync(`${configPath}config.json`,'utf8');
+		let config=JSON.parse(file);
+		let flag=false;
+		for(let i=0 ; i< Object.keys(config.WoTs).length;i++){
+			let service=config.WoTs[Object.keys(config.WoTs)[i]];
+			if(service.path.split('/')[1]===dir.split('/')[1]){
+				servicePath=`/${service.path.split('/')[1]}/${Object.keys(config.WoTs)[i]}/${service.id}`;
+				if(servicePath === dir)
+					console.log("true");
+			}else{
+				
+			}
+		}
+		if(flag)
+			return undefined;
+	}
 }
 module.exports=new wtm;
 

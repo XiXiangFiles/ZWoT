@@ -8,7 +8,10 @@
 			"description":"Demo service of resarch.",
 			"protocols":["http","tcp"],
 			"SRV":{"port":3000,"weigth":0,"priority":0},
-			"TXT":["wtm=percomTest"]
+			"TXT":["wtm=percomTest"],
+			"values":{},
+			"tags":{}
+
 		},
 		"_transfer":{
 			"id":"0",
@@ -17,6 +20,7 @@
 			"protocols":["ssh","tcp"],
 			"SRV":{"port":22,"weigth":0,"priority":0},
 			"TXT":["username=pi","pwd=testtest"],
+			"values":{"test":1},
 			"tags":{}
 		},
 		"_temperature":{
@@ -26,6 +30,7 @@
 			"protocols":["http","websocket","tcp"],
 			"SRV":{"port":3000,"weigth":0,"priority":0},
 			"TXT":["wtm=percomTest/properties/temperature/0"],
+			"values":{},
 			"tags":{}
 		},
 		"_light":{
@@ -35,6 +40,7 @@
 			"protocols":["http","tcp"],
 			"SRV":{"port":3000,"weigth":0,"priority":0},
 			"TXT":["wtm=percomTest/actions/light/0"],
+			"values":{},
 			"tags":{}
 		}
 	}
