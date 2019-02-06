@@ -239,7 +239,6 @@ function wtm(){
 		let rootPath=path.rootPath;
 		let dir=path.path;
 		let data=path.data;
-		
 		let file=fs.readFileSync(`${configPath}config.json`,'utf8');
 		let config=JSON.parse(file);
 		let flag=false;
@@ -255,6 +254,29 @@ function wtm(){
 		}
 		if(flag)
 			return undefined;
+	}
+	this.insertValues=function(obj){
+		let configPath=obj.configPath;
+		let rootPath=obj.rootPath;
+		let dir=obj.path;
+		let data=obj.data;
+		let serviceName=obj.name;
+		let values=obj.values;
+		let file=fs.readFileSync(`${configPath}config.json`,'utf8');
+		let config=JSON.parse(file);
+		let flag=true;
+		for(let i=0 ; i<Object.keys(config.WoTs).length ; i++){
+			if(Object.keys(config.WoTs)[i]===serviceName){
+				flag=false;
+				config.WoTs[serviceName].values=values;
+			}				
+		}
+		if(flag)
+			return undefined;
+		else{
+			fs.writeFileSync(`${configPath}config.json`,JSON.stringify(config));
+			return true;
+		}
 	}
 }
 module.exports=new wtm;

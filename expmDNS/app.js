@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const wtm=require('./wtm');
+let webthings=require('./models/webthing.js');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -41,9 +42,11 @@ app.use(function(err, req, res, next) {
 
 obj.configPath="";
 obj.rootPath="public/";
-wtm.mkdirFloder(obj).then(function(){
-	wtm.init(obj).then(function(){
-		wtm.adjust(obj).then(function(path){
+webthings.initThings().then(function(){
+	wtm.mkdirFloder(obj).then(function(){
+		wtm.init(obj).then(function(){
+			wtm.adjust(obj).then(function(path){
+			});
 		});
 	});
 });
