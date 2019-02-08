@@ -1,0 +1,20 @@
+{
+	"actions":{
+		"_light":{
+			"valueName":"status",
+			"init":"close"
+		}
+	},
+	"properties":{
+		"_temperature":{
+			"valueName":"degree",
+			"init":0
+		}
+	},
+	"custom":{
+		"_transfer":{
+			"valueName":"status",
+			"init":"alive"
+		}
+	}
+}
