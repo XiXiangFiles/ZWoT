@@ -42,16 +42,16 @@ class backend{
 		path.configPath="";
 		path.rootPath="public/";
 		path.path=req.url;
-		path.data=req.body.data;
-		let resultWtm=wtm.postWtm(path);
+		path.data=req.body;
+		path.host=res.req.headers.host;
 		if(req.url=='/'){
-			res.write(`${req.url}`);
+			res.writeHead('204',{Location:`http://${wtm.postWtm(path)}`});
 		}else{
 			let flag=true;
 			for(let i=1; i<post.length ; i++){
 				if(req.url.includes(post[i])){
 					flag=false;
-					res.write(`${req.url}`);
+					res.writeHead('204',{Location:`http://${wtm.postWtm(path)}`});
 				}
 			}
 			if(flag)

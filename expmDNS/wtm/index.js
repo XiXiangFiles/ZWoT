@@ -241,19 +241,38 @@ function wtm(){
 		let data=path.data;
 		let file=fs.readFileSync(`${configPath}config.json`,'utf8');
 		let config=JSON.parse(file);
-		let flag=false;
+		let flag=true;
 		for(let i=0 ; i< Object.keys(config.WoTs).length;i++){
 			let service=config.WoTs[Object.keys(config.WoTs)[i]];
 			if(service.path.split('/')[1]===dir.split('/')[1]){
 				servicePath=`/${service.path.split('/')[1]}/${Object.keys(config.WoTs)[i]}/${service.id}`;
-				if(servicePath === dir)
-					console.log("true");
-			}else{
-				
+				if(servicePath === dir){
+					for(let j=0 ;j< Object.keys(data).length ; j++){
+						if(config.WoTs[Object.keys(config.WoTs)[i]].values[Object.keys(path.data)[j]]!==undefined){
+							config.WoTs[Object.keys(config.WoTs)[i]].values[Object.keys(path.data)[j]]=path.data[Object.keys(path.data)[j]];
+							flag=false;
+						}
+					}
+				}	
 			}
 		}
-		if(flag)
-			return undefined;
+		if(flag){
+			if(fs.existsSync(`${path.rootPath}/logs/postlog`)){
+				let logs=fs.readFileSync(`${path.rootPath}/logs/postlog`,'utf8');
+				logs=logs.split('\n');
+				return logs[logs.length-2];
+			}else
+				return undefined;
+		}else{
+			fs.writeFileSync(`${configPath}config.json`,JSON.stringify(config));
+			if(fs.existsSync(`${path.rootPath}/logs/postlog`)){
+				fs.appendFile(`${path.rootPath}/logs/postlog`, path.host+dir+'\n',(err)=>{});
+				return path.host+dir;
+			}else{
+				fs.writeFile(`${path.rootPath}/logs/postlog`, path.host+dir+'\n',(err)=>{});
+				return path.host+dir;
+			}	
+		}
 	}
 	this.insertValues=function(obj){
 		let configPath=obj.configPath;

@@ -27,16 +27,19 @@ class webthings{
 				if(category(type)!==undefined){
 					let values={};
 					values[category(type).valueName]=category(type).init;
-					map.set(Object.keys(config.WoTs)[i],values);
+					map.set(`${service.path}${type.subtype}/${service.id}`,values);
 				}
 			}
-			map.forEach(function(value, key){
+			let seviceitem=map.entries();
+			for(let i = 0 ; i< map.size ; i++){
+				let item=seviceitem.next().value;
 				let obj={};
 				obj.configPath="";
 				obj.rootPath="public/";
-				obj.values=value;
-				obj.serviceName=key;
-			});
+				obj.path=item[0];
+				obj.values=item[1];	
+				wtm.insertValues(obj);
+			}
 			resolve();
 		});	
 	}
