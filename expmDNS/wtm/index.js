@@ -234,6 +234,27 @@ function wtm(){
 			return undefined;
 		}	
 	}
+	this.insertValues=function(obj){
+		let configPath=obj.configPath;
+		let rootPath=obj.rootPath;
+		let dir=obj.path;
+		let values=obj.values;
+		let file=fs.readFileSync(`${configPath}config.json`,'utf8');
+		let config=JSON.parse(file);
+		let flag=true;
+		for(let i=0 ; i<Object.keys(config.WoTs).length ; i++){
+			if(`${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/${config.WoTs[Object.keys(config.WoTs)[i]].id}`===dir){
+				flag=false;
+				config.WoTs[Object.keys(config.WoTs)[i]].values=values;
+			}
+		}
+		if(flag)
+			return undefined;
+		else{
+			fs.writeFileSync(`${configPath}config.json`,JSON.stringify(config));
+			return true;
+		}	
+	}
 	this.postWtm=function(path){
 		let configPath=path.configPath;
 		let rootPath=path.rootPath;
@@ -274,26 +295,41 @@ function wtm(){
 			}	
 		}
 	}
-	this.insertValues=function(obj){
-		let configPath=obj.configPath;
-		let rootPath=obj.rootPath;
-		let dir=obj.path;
-		let values=obj.values;
+	this.delWtmService=function(path){
+		let configPath=path.configPath;
+		let rootPath=path.rootPath;
+		let dir=path.path;
+		let data=path.data;
 		let file=fs.readFileSync(`${configPath}config.json`,'utf8');
 		let config=JSON.parse(file);
 		let flag=true;
-		for(let i=0 ; i<Object.keys(config.WoTs).length ; i++){
-			if(`${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/${config.WoTs[Object.keys(config.WoTs)[i]].id}`===dir){
-				flag=false;
-				config.WoTs[Object.keys(config.WoTs)[i]].values=values;
+		if(dir==="/"){
+			config.WoTs={};
+			flag=false;
+		}else{
+			for(let i=0 ; i< Object.keys(config.WoTs).length;i++){
+				let service=config.WoTs[Object.keys(config.WoTs)[i]];
+				if(service.path.split('/')[1]===dir.split('/')[1]){
+					servicePath=`/${service.path.split('/')[1]}/${Object.keys(config.WoTs)[i]}/${service.id}`;
+					if(servicePath === dir){
+						delete config.WoTs[Object.keys(config.WoTs)[i]];
+						flag=false;
+					}	
+				}
 			}
 		}
-		if(flag)
+		if(flag){
 			return undefined;
-		else{
+		}else{
 			fs.writeFileSync(`${configPath}config.json`,JSON.stringify(config));
 			return true;
-		}	
+		}
+	}
+	this.addWtmSub=function(path){
+
+	}
+	this.delWtmSub=function(path){
+	
 	}
 }
 module.exports=new wtm;

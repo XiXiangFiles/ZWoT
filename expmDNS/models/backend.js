@@ -50,7 +50,9 @@ class backend{
 			let flag=true;
 			for(let i=1; i<post.length ; i++){
 				if(req.url.includes(post[i])){
-					flag=false;
+					flag=falsei;
+					if(post[i] !== 'action')
+						path.data={};
 					res.writeHead('204',{Location:`http://${wtm.postWtm(path)}`});
 				}
 			}
@@ -60,17 +62,31 @@ class backend{
 		res.end();
 	}
 	navigateDel(req, res, next){
-		let del=['actions','subscriptions'];
-		let flag=true;
-		for(let i=0; i<del.length ; i++){
-			if(req.url.includes(del[i])){
-				flag=false;
-				res.write(`${req.url}`);
+		let del=['/','actions','subscriptions','things'];
+		let path={};
+		path.configPath="";
+		path.rootPath="public/";
+		path.path=req.url;
+		if(req.url=='/'){
+			wtm.delWtmService(path);
+			res.writeHead('200',{});
+		}else{
+			let flag=true;
+			for(let i=1; i<del.length ; i++){
+				if(req.url.includes(del[i])){
+					flag=false;
+					if(del[i] === 'subscriptions'){
+						wtm.delWtmSub(path);
+						res.writeHead('200',{});
+					}else{
+						wtm.delWtmService(path);
+						res.writeHead('200',{});
+					}
+				}
 			}
+			if(flag)
+				res.writeHead("404",[]);
 		}
-		if(flag)
-			res.writeHead("404",[]);
-
 		res.end();
 	}
 }
