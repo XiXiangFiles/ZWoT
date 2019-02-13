@@ -22,12 +22,21 @@ class webthings{
 			for(let i=0;i<Object.keys(config.WoTs).length;i++){
 				let service=config.WoTs[Object.keys(config.WoTs)[i]];
 				let type={};
+				let obj={}; 
 				type.type=service.path.split('/')[1];
 				type.subtype=Object.keys(config.WoTs)[i];
 				if(category(type)!==undefined){
 					let values={};
 					values[category(type).valueName]=category(type).init;
 					map.set(`${service.path}${type.subtype}/${service.id}`,values);
+				}
+				if(type.type === "properties" || type.type  ==="actions"){
+					obj.subscriptions={};
+					obj.subscriptions.id=i;
+					obj.subscriptions.subscriberId="";
+					obj.subscriptions.type="websocket";
+					obj.subscriptions.resource=config.WoTs[Object.keys(config.WoTs)[i]].path;
+					Object.assign(config.WoTs[Object.keys(config.WoTs)[i]].tags,obj);
 				}
 			}
 			let seviceitem=map.entries();
@@ -40,6 +49,7 @@ class webthings{
 				obj.values=item[1];	
 				wtm.insertValues(obj);
 			}
+			fs.writeFileSync(`config.json`,JSON.stringify(config));
 			resolve();
 		});	
 	}
