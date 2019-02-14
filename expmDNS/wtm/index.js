@@ -3,7 +3,6 @@ const datetime=require('../node_modules/node-datetime');
 const decode = require('../node_modules/urldecode');
 let  dirTree=require('../node_modules/directory-tree');
 function wtm(){
-
 	let dir=new Set();
 	function mkdir(path){
 		try{
@@ -18,9 +17,9 @@ function wtm(){
 			let file=fs.readFileSync(`${configPath}config.json`,'utf8');
 			let config=JSON.parse(file);
 			mkdir(`${rootPath}root`);
-			config.folder.forEach(function(floder){
-				mkdir(`${rootPath}root/${floder}`);
-			});
+			for(let i = 0 ; i< config.folder.length ; i++){
+				mkdir(`${rootPath}root/${config.folder[i]}`);
+			}
 			resolve();
 		});
 	}
@@ -77,32 +76,12 @@ function wtm(){
 	}
 	this.adjust=function(obj){
 		return new Promise(function(resolve){
-			function classify(services){
-				let service= new Set();
-				let allService=[];
-				for(let i = 0 ; i< services.length ; i++){
-					service.add(services[i].name);
-				}
-				let serviceName=service.values();
-				for(i = 0 ; i< service.size ; i++){
-					let arr=[]
-					let name= serviceName.next().value;
-					for(let j = 0 ; j < services.length ; j++){
-						if(name===services[j].name){
-							arr.push(services[j]);
-						}
-					}
-					allService.push(JSON.parse(`{"${name}":${JSON.stringify(arr)}}`));
-				}
-				return allService;
-			}
 			let configPath=obj.configPath;
 			let rootPath=obj.rootPath;
 			let file=fs.readFileSync(`${configPath}config.json`,'utf8');
 			let config=JSON.parse(file);
 			let services=new Map();
 			let servicesWriteFile=new Map();
-
 			let tree = dirTree(`${rootPath}root`,{ extensions: /.json$/ },function(path,item){
 				dir.add(path.path);
 				let splitPath=path.path.split('/');
@@ -120,32 +99,34 @@ function wtm(){
 			let propertiesSet=new Set();
 			let actionsSet=new Set();
 			let customSet = new Set();
-
 			model.properties={};
 			model.properties.link="/properties";
 			model.properties.title="List of Properties";
-			model.properties.resource=[];
+			model.properties.resource={};
 			model.actions={};
 			model.actions.link="/actions";
 			model.actions.title="Actions of this Web Thing";
-			model.actions.resource=[];
+			model.actions.resource={};
 			model.custom={};
-			model.custom.resource=[];
+			model.custom.resource={};
+			for(let i =0 ; i< Object.keys(config.WoTs).length ;i++){
+				if(config.WoTs[Object.keys(config.WoTs)[i]].path.split('/')[1]!="" && config.WoTs[Object.keys(config.WoTs)[i]].path.split('/')[1]!==undefined){
+					model[config.WoTs[Object.keys(config.WoTs)[i]].path.split('/')[1]].resource[Object.keys(config.WoTs)[i]]=[];
+				}
+			}
 			let promise=new Promise(function(complete){
 				for(let j=0 ; j< services.size; j++){
 					let serviceEntry = service.next().value;
 					let path=serviceEntry[1].replace(/:/gi,'/');
-					floder=serviceEntry[1].split(":");
-					floder=serviceEntry[0]
-					switch(floder){
+					switch(serviceEntry[0]){
 						case 'properties':
-							model.properties.resource.push(JSON.parse(fs.readFileSync(`${rootPath}root/properties/${path}`,'utf8',function(err){})));
+							model.properties.resource[serviceEntry[1].split(":")[0]].push(JSON.parse(fs.readFileSync(`${rootPath}root/properties/${path}`,'utf8',function(err){})));
 							break;
 						case 'actions':
-							model.actions.resource.push(JSON.parse(fs.readFileSync(`${rootPath}root/actions/${path}`,'utf8',function(err){})));
+							model.actions.resource[serviceEntry[1].split(":")[0]].push(JSON.parse(fs.readFileSync(`${rootPath}root/actions/${path}`,'utf8',function(err){})));
 							break;
 						case 'custom':
-							model.custom.resource.push(JSON.parse(fs.readFileSync(`${rootPath}root/custom/${path}`,'utf8',function(err){})));
+							model.custom.resource[serviceEntry[1].split(":")[0]].push(JSON.parse(fs.readFileSync(`${rootPath}root/custom/${path}`,'utf8',function(err){})));
 							break;
 					}
 				}
@@ -160,29 +141,24 @@ function wtm(){
 					fs.writeFileSync(`${rootPath}root/actions/${config.Instance}.json`,JSON.stringify(model.actions.resource),(err)=>{});
 					fs.writeFileSync(`${rootPath}root/custom/links`,`Link:http://${config.A.data}/custom;rel="type"`,(err)=>{});
 					fs.writeFileSync(`${rootPath}root/custom/${config.Instance}.json`,JSON.stringify(model.custom.resource),(err)=>{});
-					
-					let properties=classify(model.properties.resource);
-					let actions=classify(model.actions.resource);
-					let custom=classify(model.custom.resource);
-					for(let j = 0 ; j< properties.length ;j++){
-						let obj=properties[j];
-						fs.writeFileSync(`${rootPath}root/properties/${obj[Object.keys(properties[j])][j].name}/${config.Instance}.json`,JSON.stringify(obj[Object.keys(properties[j])][j]),(err)=>{}); 	
-						fs.writeFileSync(`${rootPath}root/properties/${obj[Object.keys(properties[j])][j].name}/links`,`Link:http://${config.A.data}/properties/${obj[Object.keys(properties[j])][j].name};rel="type"`)
+					let properties=model.properties.resource;
+					let actions=model.actions.resource;
+					let custom=model.custom.resource;
+					for(let j = 0 ; j< Object.keys(properties).length ;j++){
+						fs.writeFileSync(`${rootPath}root/properties/${Object.keys(properties)[j]}/${config.Instance}.json`,JSON.stringify(properties[Object.keys(properties)[j]]),(err)=>{});
+						fs.writeFileSync(`${rootPath}root/properties/${Object.keys(properties)[j]}/links`,`Link:http://${config.A.data}/properties/${Object.keys(properties)[j]};rel="type"`,(err)=>{});
 					}
-					for(j = 0 ; j< actions.length ;j++){
-						let obj=actions[j];
-						fs.writeFileSync(`${rootPath}root/actions/${obj[Object.keys(actions[j])][j].name}/${config.Instance}.json`,JSON.stringify(obj[Object.keys(actions[j])][j]),(err)=>{}); 	
-						fs.writeFileSync(`${rootPath}root/actions/${obj[Object.keys(actions[j])][j].name}/links`,`Link:http://${config.A.data}/actions/${obj[Object.keys(actions[j])][j].name};rel="type"`)
+					for(let j = 0 ; j< Object.keys(actions).length ;j++){
+						fs.writeFileSync(`${rootPath}root/actions/${Object.keys(actions)[j]}/${config.Instance}.json`,JSON.stringify(actions[Object.keys(actions)[j]]),(err)=>{});
+						fs.writeFileSync(`${rootPath}root/actions/${Object.keys(actions)[j]}/links`,`Link:http://${config.A.data}/actions/${Object.keys(actions)[j]};rel="type"`,(err)=>{});
 					}
-					for(j = 0 ; j< custom.length ;j++){
-						let obj=custom[j];
-						fs.writeFileSync(`${rootPath}root/custom/${obj[Object.keys(custom[j])][j].name}/${config.Instance}.json`,JSON.stringify(obj[Object.keys(custom[j])][j]),(err)=>{}); 	
-						fs.writeFileSync(`${rootPath}root/custom/${obj[Object.keys(custom[j])][j].name}/links`,`Link:http://${config.A.data}/custom/${obj[Object.keys(custom[j])][j].name};rel="type"`)
+					for(let j = 0 ; j< Object.keys(custom).length ;j++){
+						fs.writeFileSync(`${rootPath}root/custom/${Object.keys(custom)[j]}/${config.Instance}.json`,JSON.stringify(custom[Object.keys(custom)[j]]),(err)=>{});
+						fs.writeFileSync(`${rootPath}root/custom/${Object.keys(custom)[j]}/links`,`Link:http://${config.A.data}/custom/${Object.keys(custom)[j]};rel="type"`,(err)=>{});
 					}
 					resolve(dir);
 				});
 			});
-			
 	}
 	this.getAllPath=function(obj){
 		function scan(path){
@@ -324,12 +300,6 @@ function wtm(){
 			fs.writeFileSync(`${configPath}config.json`,JSON.stringify(config));
 			return true;
 		}
-	}
-	this.addWtmSub=function(path){
-
-	}
-	this.delWtmSub=function(path){
-	
 	}
 }
 module.exports=new wtm;
