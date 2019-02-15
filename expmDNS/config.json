@@ -20,7 +20,8 @@
 			"protocols":["ssh","tcp"],
 			"SRV":{"port":22,"weigth":0,"priority":0},
 			"TXT":["username=pi","pwd=testtest"],
-			"values":{"test":1},
+			"values":{},
+			"status":"alive",
 			"tags":{}
 		},
 		"_temperature":{
