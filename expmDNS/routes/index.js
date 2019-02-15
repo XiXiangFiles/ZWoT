@@ -7,9 +7,10 @@ let obj={};
 obj.configPath="";
 obj.rootPath="public/";
 
-webthings.initThings().then(function(){
+webthings.initThings().then(function(subscrition){
 	wtm.mkdirFloder(obj).then(function(){
 		wtm.init(obj).then(function(){
+			wtm.insertSubscription(subscrition);
 			wtm.adjust(obj).then(function(){
 			// view engine setup
 				let promise=new Promise(function(resolve){
