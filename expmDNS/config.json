@@ -31,6 +31,7 @@
 			"SRV":{"port":3000,"weigth":0,"priority":0},
 			"TXT":["wtm=percomTest/properties/temperature/0"],
 			"values":{},
+			"status":"none",
 			"tags":{}
 		},
 		"_light":{
@@ -41,6 +42,7 @@
 			"SRV":{"port":3000,"weigth":0,"priority":0},
 			"TXT":["wtm=percomTest/actions/light/0"],
 			"values":{},
+			"status":"none",
 			"tags":{}
 		}
 	}
