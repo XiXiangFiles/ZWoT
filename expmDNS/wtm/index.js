@@ -45,7 +45,6 @@ function wtm(){
 
 			fs.writeFileSync(`${rootPath}root/links`,Links, function (err) {});
 			fs.writeFileSync(`${rootPath}root/${config.Instance}.json`,JSON.stringify(profile), function (err) {});
-			
 			for(let i=0 ; i<Object.keys(config.WoTs).length;i++){
 				if(Object.keys(config.WoTs)[i]!==config.Instance){
 					let obj={};
@@ -54,21 +53,17 @@ function wtm(){
 					obj.name=Object.keys(config.WoTs)[i];
 					obj.description=config.WoTs[Object.keys(config.WoTs)[i]].description;
 					obj.values=config.WoTs[Object.keys(config.WoTs)[i]].values;
+					obj.status=config.WoTs[Object.keys(config.WoTs)[i]].status;
 					obj.tags=config.WoTs[Object.keys(config.WoTs)[i]].tags;
 					mkdir(`${rootPath}${config.WoTs[Object.keys(config.WoTs)[i]].path}`);
 					mkdir(`${rootPath}${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}`);
 					mkdir(`${rootPath}${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/${config.WoTs[Object.keys(config.WoTs)[i]].id}`);
 					try{
-						fs.writeFileSync(`${rootPath}${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/links`,
-							link,(err)=>{}
-						);
-						fs.writeFileSync(`${rootPath}${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/${config.WoTs[Object.keys(config.WoTs)[i]].id}/${config.Instance}.json`,
-							JSON.stringify(obj),(err)=>{}
-						);
+						fs.writeFileSync(`${rootPath}${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/links`,link,(err)=>{});
+						fs.writeFileSync(`${rootPath}${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/${config.WoTs[Object.keys(config.WoTs)[i]].id}/${config.Instance}.json`,JSON.stringify(obj),(err)=>{});
 					}catch(e){
 						console.error(e);
-					}
-					
+					}	
 				}
 			}
 			resolve();
@@ -85,7 +80,7 @@ function wtm(){
 			let tree = dirTree(`${rootPath}root`,{ extensions: /.json$/ },function(path,item){
 				dir.add(path.path);
 				let splitPath=path.path.split('/');
-				if(splitPath.length > 4){
+				if(splitPath.length > 5){
 					let serviceName=splitPath[2]
 					let content=splitPath[3];
 					for(let i=4 ;i<splitPath.length ; i++ ){
@@ -121,6 +116,7 @@ function wtm(){
 					switch(serviceEntry[0]){
 						case 'properties':
 							model.properties.resource[serviceEntry[1].split(":")[0]].push(JSON.parse(fs.readFileSync(`${rootPath}root/properties/${path}`,'utf8',function(err){})));
+							console.log(`${rootPath}root/properties/${path}`);
 							break;
 						case 'actions':
 							model.actions.resource[serviceEntry[1].split(":")[0]].push(JSON.parse(fs.readFileSync(`${rootPath}root/actions/${path}`,'utf8',function(err){})));
@@ -188,7 +184,6 @@ function wtm(){
 		else
 			dir+=`${config.Instance}.json`;
 		
-		console.log(dir);
 		try{
 			return fs.readFileSync(`${rootPath}root${dir}`,'utf8');
 		}catch(e){
@@ -243,13 +238,9 @@ function wtm(){
 			let service=config.WoTs[Object.keys(config.WoTs)[i]];
 			if(service.path.split('/')[1]===dir.split('/')[1]){
 				servicePath=`/${service.path.split('/')[1]}/${Object.keys(config.WoTs)[i]}/${service.id}`;
-				if(servicePath === dir){
-					for(let j=0 ;j< Object.keys(data).length ; j++){
-						if(config.WoTs[Object.keys(config.WoTs)[i]].values[Object.keys(path.data)[j]]!==undefined){
-							config.WoTs[Object.keys(config.WoTs)[i]].values[Object.keys(path.data)[j]]=path.data[Object.keys(path.data)[j]];
-							flag=false;
-						}
-					}
+				if(servicePath === dir && config.WoTs[Object.keys(config.WoTs)[i]].status != undefined){
+					config.WoTs[Object.keys(config.WoTs)[i]].status=data.status;
+					flag=false;
 				}	
 			}
 		}
@@ -261,7 +252,9 @@ function wtm(){
 			}else
 				return undefined;
 		}else{
-			fs.writeFileSync(`${configPath}config.json`,JSON.stringify(config));
+			let wtm=this;
+			fs.writeFileSync(`${configPath}config.json`,JSON.stringify(config));	
+			wtm.init(path).then(()=>{wtm.adjust(path);});
 			if(fs.existsSync(`${path.rootPath}/logs/postlog`)){
 				fs.appendFile(`${path.rootPath}/logs/postlog`, path.host+dir+'\n',(err)=>{});
 				return path.host+dir;
@@ -300,6 +293,12 @@ function wtm(){
 			fs.writeFileSync(`${configPath}config.json`,JSON.stringify(config));
 			return true;
 		}
+	}
+	this.insertSubscription=function(path){
+		let configPath=path.configPath;
+		let rootPath=path.rootPath;
+		let config=JSON.parse(fs.readFileSync(`${configPath}config.json`,'utf8'));
+		fs.writeFileSync(`${rootPath}root/subscription/${config.Instance}.json`,JSON.stringify(path.data),(err)=>{});
 	}
 }
 module.exports=new wtm;
