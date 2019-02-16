@@ -217,12 +217,13 @@ function wtm(){
 			if(`${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/${config.WoTs[Object.keys(config.WoTs)[i]].id}`===dir){
 				flag=false;
 				config.WoTs[Object.keys(config.WoTs)[i]].values=values;
+				//console.log(JSON.stringify(config.WoTs[Object.keys(config.WoTs)[i]])+"\n");
 			}
 		}
 		if(flag)
 			return undefined;
 		else{
-			fs.writeFileSync(`${configPath}config.json`,JSON.stringify(config));
+			fs.writeFileSync(`${configPath}config.json`,JSON.stringify(config), function (err) {});
 			return true;
 		}	
 	}
@@ -299,6 +300,11 @@ function wtm(){
 		let rootPath=path.rootPath;
 		let config=JSON.parse(fs.readFileSync(`${configPath}config.json`,'utf8'));
 		fs.writeFileSync(`${rootPath}root/subscription/${config.Instance}.json`,JSON.stringify(path.data),(err)=>{});
+	}
+	this.getConfig=function(path){
+		let configPath=path.configPath;
+		let rootPath=path.rootPath;
+		return JSON.parse(fs.readFileSync(`${configPath}config.json`,'utf8'));
 	}
 }
 module.exports=new wtm;

@@ -50,8 +50,8 @@ class backend{
 			let flag=true;
 			for(let i=1; i<post.length ; i++){
 				if(req.url.includes(post[i])){
-					flag=falsei;
-					if(post[i] !== 'action')
+					flag=false;
+					if(post[i] !== 'actions')
 						path.data={};
 					res.writeHead('204',{Location:`http://${wtm.postWtm(path)}`});
 				}

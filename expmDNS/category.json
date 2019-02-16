@@ -1,8 +1,8 @@
 {
 	"actions":{
 		"_light":{
-			"valueName":"status",
-			"init":"close"
+			"valueName":"power",
+			"init":"100%"
 		}
 	},
 	"properties":{
@@ -13,8 +13,8 @@
 	},
 	"custom":{
 		"_transfer":{
-			"valueName":"status",
-			"init":"alive"
+			"valueName":"ssh",
+			"init":"available"
 		}
 	}
 }

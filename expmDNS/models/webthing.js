@@ -52,8 +52,6 @@ class webthings{
 				obj.values=item[1];	
 				wtm.insertValues(obj);
 			}
-			fs.writeFileSync(`config.json`,JSON.stringify(config));
-//			wtm.insertSubscription({configPath:"",rootPath:"public/",data:subscription});
 			resolve({configPath:"",rootPath:"public/",data:subscription});
 		});	
 	}
@@ -66,36 +64,34 @@ class webthings{
     		autoAcceptConnections: false
 		});
 		wsServer.on('request', function(request) {
-	    if (!originIsAllowed(request.origin)) {
-	      // Make sure we only accept requests from an allowed origin
-	      request.reject();
-	      console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
-	      return;
-	    }
+			if (!originIsAllowed(request.origin)) {
+			      // Make sure we only accept requests from an allowed origin
+	      			request.reject();
+		      		console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
+	      			return;
+	    		}
 	    
-	    let connection = request.accept('echo-protocol', request.origin);
-	    console.log((new Date()) + ' Connection accepted.');
-	    connection.on('message', function(message) {
-	        if (message.type === 'utf8') {
-	        	console.log(`message.utf8Data :${message.utf8Data}`)
-	        	let queryData=JSON.parse(message.utf8Data);
+			let connection = request.accept('echo-protocol', request.origin);
+			console.log((new Date()) + ' Connection accepted.');
+			connection.on('message', function(message) {
+		        if (message.type === 'utf8') {
+	        		console.log(`message.utf8Data :${message.utf8Data}`)
+		        	let queryData=JSON.parse(message.utf8Data);
 			/*
-	        	console.log(`profile/${queryData.name}/${queryData.type}/${queryData.name}.json`);
-			setInterval(function(){
-	        		fs.readFile(`profile/${queryData.name}/${queryData.data}/${queryData.name}.json`,'utf8',function(err,data){
-	        			// console.log(data);
-	        			connection.sendUTF(data);
-	        		});
-	        	},1000); 
+		        	console.log(`profile/${queryData.name}/${queryData.type}/${queryData.name}.json`);
+				setInterval(function(){
+	        			fs.readFile(`profile/${queryData.name}/${queryData.data}/${queryData.name}.json`,'utf8',function(err,data){
+	        				// console.log(data);
+	        				connection.sendUTF(data);
+		        		});
+		        	},1000); 
 			*/
-	        }
-	    });
-	    
-	    connection.on('close', function(reasonCode, description) {
-	        console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
-	    });
-	});
-	 
+	        	}
+	    		});
+	    		connection.on('close', function(reasonCode, description) {
+	        		console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+	    		});
+		});
 	}
 }
 module.exports=new webthings();
