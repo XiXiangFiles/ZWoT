@@ -115,14 +115,25 @@ function wtm(){
 					let path=serviceEntry[1].replace(/:/gi,'/');
 					switch(serviceEntry[0]){
 						case 'properties':
-							model.properties.resource[serviceEntry[1].split(":")[0]].push(JSON.parse(fs.readFileSync(`${rootPath}root/properties/${path}`,'utf8',function(err){})));
-							console.log(`${rootPath}root/properties/${path}`);
+							try{
+								model.properties.resource[serviceEntry[1].split(":")[0]].push(JSON.parse(fs.readFileSync(`${rootPath}root/properties/${path}`,'utf8',function(err){})));
+							}catch(err){
+							
+							}
 							break;
 						case 'actions':
-							model.actions.resource[serviceEntry[1].split(":")[0]].push(JSON.parse(fs.readFileSync(`${rootPath}root/actions/${path}`,'utf8',function(err){})));
+							try{
+								model.actions.resource[serviceEntry[1].split(":")[0]].push(JSON.parse(fs.readFileSync(`${rootPath}root/actions/${path}`,'utf8',function(err){})));
+							}catch(err){
+							
+							}
 							break;
 						case 'custom':
-							model.custom.resource[serviceEntry[1].split(":")[0]].push(JSON.parse(fs.readFileSync(`${rootPath}root/custom/${path}`,'utf8',function(err){})));
+							try{
+								model.custom.resource[serviceEntry[1].split(":")[0]].push(JSON.parse(fs.readFileSync(`${rootPath}root/custom/${path}`,'utf8',function(err){})));
+							}catch(err){
+							
+							}
 							break;
 					}
 				}
@@ -217,7 +228,6 @@ function wtm(){
 			if(`${config.WoTs[Object.keys(config.WoTs)[i]].path}${Object.keys(config.WoTs)[i]}/${config.WoTs[Object.keys(config.WoTs)[i]].id}`===dir){
 				flag=false;
 				config.WoTs[Object.keys(config.WoTs)[i]].values=values;
-				//console.log(JSON.stringify(config.WoTs[Object.keys(config.WoTs)[i]])+"\n");
 			}
 		}
 		if(flag)
@@ -240,8 +250,10 @@ function wtm(){
 			if(service.path.split('/')[1]===dir.split('/')[1]){
 				servicePath=`/${service.path.split('/')[1]}/${Object.keys(config.WoTs)[i]}/${service.id}`;
 				if(servicePath === dir && config.WoTs[Object.keys(config.WoTs)[i]].status != undefined){
-					config.WoTs[Object.keys(config.WoTs)[i]].status=data.status;
-					flag=false;
+					if(data.status !== undefined){
+						config.WoTs[Object.keys(config.WoTs)[i]].status=data.status;
+						flag=false;
+					}
 				}	
 			}
 		}
@@ -291,9 +303,33 @@ function wtm(){
 		if(flag){
 			return undefined;
 		}else{
+			let wtm=this;
+			wtm.reset(path);
 			fs.writeFileSync(`${configPath}config.json`,JSON.stringify(config));
 			return true;
 		}
+	}
+	this.reset=function(path){
+		let configPath=path.configPath;
+		let rootPath=path.rootPath;
+		let dir=path.path;
+		let data=path.data;
+		let config=JSON.parse(fs.readFileSync(`${configPath}config.json`,'utf8'));
+		let wtm=this;
+		let promise=new Promise(function(resolve){
+			resolve(wtm.getAllPath(path));
+		});
+		promise.then(function(all){
+			for(let i=0; i<all.length; i++){
+				fs.writeFileSync(`${all[i]}`,'{}','utf8');
+			}
+			try{
+				wtm.init(path).then(()=>{wtm.adjust(path)});
+			}catch(err){
+				console.log(err);
+			}
+		})
+		
 	}
 	this.insertSubscription=function(path){
 		let configPath=path.configPath;
