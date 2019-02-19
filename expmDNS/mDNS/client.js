@@ -43,4 +43,4 @@ mdns.on('response',function (res){
 		}
 	});
 });
-mdns.query([{name:'_services._dns-sd._udp.local', type:'PTR'}]);
+mdns.query([{name:'_temperature._sub._http._websocket._tcp.local', type:'PTR'}]);
