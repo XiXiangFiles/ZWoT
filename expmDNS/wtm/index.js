@@ -342,6 +342,11 @@ function wtm(){
 		let rootPath=path.rootPath;
 		return JSON.parse(fs.readFileSync(`${configPath}config.json`,'utf8'));
 	}
+	this.updateConfig=function(obj){
+		let configPath=obj.configPath;
+		let rootPath=obj.rootPath;
+		fs.writeFileSync(`${configPath}config.json`,JSON.stringify(obj.config));
+	}
 }
 module.exports=new wtm;
 
