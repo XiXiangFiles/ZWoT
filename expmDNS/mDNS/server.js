@@ -39,7 +39,7 @@ function bonjour(){
 	this.listen=function(){
 		let bonjour=this;
 		let config=wtm.getConfig({configPath:"",rootPath:"public/"});
-		mdns.on('query',function(res){
+		mdns.on('query',function(res,info){
 			let listServicewithIns=bonjour.listServicewithIns;
 			let listService=bonjour.listService;
 			let srv=bonjour.srv;
@@ -109,11 +109,11 @@ function bonjour(){
 						answers.push(obj);
 					}
 				}
-				resolve({answers:answers,additionals:additionals});
+				resolve({answers:answers,additionals:additionals,info:info});
 			});
 			promise.then(function(full){
 				console.log(full);
-				mdns.respond({answers:full.answers,additionals:full.additionals});
+				mdns.respond({answers:full.answers,additionals:full.additionals},full.info);
 			});
 		});
 	}
