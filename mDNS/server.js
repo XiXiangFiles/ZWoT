@@ -1,4 +1,5 @@
 const mdns = require('../node_modules/zwot-multicast-dns')()
+const color = require('../node_modules/colors')
 const wtm = require('../wtm')
 
 function Bonjour () {
@@ -59,78 +60,52 @@ function Bonjour () {
               packet.data = config.Instance + '.' + listService[i]
               answers.push(packet)
             }
-          } else if (listService.includes(res.questions.map(function (element) {
-            if (element.type === 'PTR') {
-              return element.name
-            }
-          }).toString())) {
-            let packet = {}
-            packet.name = res.questions.map(function (element) {
+          } else {
+            let ptr = res.questions.map(function (element) {
               if (element.type === 'PTR') {
                 return element.name
               }
-            }).toString()
-            packet.type = 'PTR'
-            packet.ttl = 120
-            packet.data = config.Instance + '.' + packet.name
-            answers.push(packet)
-          }
-        }
-        if (res.questions.map((element) => {
-          return element.type
-        }).includes('SRV')) {
-          console.log(res.questions.map(function (element) {
-            if (element.type === 'SRV') {
-              return element.name
-            }
-          }))
-          if (listServicewithIns.includes(res.questions.map(function (element) {
-            if (element.type === 'SRV') {
-              return element.name
-            }
-          }).toString())) {
-            let packet = {}
-            let serviceSRV = JSON.parse(srv.get(res.questions.map(function (element) {
-              if (element.type === 'SRV') {
-                return element.name
-              }
-            }).toString()))
-            packet.name = res.questions.map(function (element) {
-              if (element.type === 'SRV') {
-                return element.name
-              }
-            }).toString()
-            packet.type = 'SRV'
-            packet.ttl = 120
-            packet.data = serviceSRV
-            answers.push(packet)
-          }
-        }
-        if (res.questions.map((element) => {
-          return element.type
-        }).includes('TXT')) {
-          if (listServicewithIns.includes(res.questions.map(function (element) {
-            if (element.type === 'TXT') {
-              return element.name
-            }
-          }).toString())) {
-            let packet = {}
-            let serviceTXT = JSON.parse(txt.get(res.questions.map(function (element) {
-              if (element.type === 'TXT') {
-                return element.name
-              }
-            }).toString()))
-            packet.name = res.questions.map(function (element) {
-              if (element.type === 'TXT') {
-                return element.name
-              }
-            }).toString()
-            packet.type = 'TXT'
-            packet.ttl = 120
-            packet.data = []
-            for (let i = 0; i < serviceTXT.length; i++) { packet.data.push(Buffer.from(serviceTXT[i], 'ascii')) }
+            }).toString().split(',')
 
-            answers.push(packet)
+            for (let i = 0; i < ptr.length; i++) {
+              if (listService.includes(ptr[i])) {
+                const packet = {}
+                packet.name = ptr[i]
+                packet.type = 'PTR'
+                packet.ttl = 120
+                packet.data = config.Instance + '.' + ptr[i]
+                answers.push(packet)
+              }
+            }
+          }
+        }
+        if (res.questions.map((element) => { return element.type }).includes('SRV')) {
+          let name = res.questions.map(function (element) { if (element.type === 'SRV') { return element.name } }).toString().split(',')
+          for (let i = 0; i < name.length; i++) {
+            if (listServicewithIns.includes(name[i])) {
+              const packet = {}
+              packet.name = name[i]
+              packet.type = 'SRV'
+              packet.ttl = 120
+              packet.data = JSON.parse(srv.get(name[i]))
+              answers.push(packet)
+            }
+          }
+        }
+        if (res.questions.map((element) => { return element.type }).includes('TXT')) {
+          let name = res.questions.map(function (element) { if (element.type === 'TXT') { return element.name } }).toString().split(',')
+          for (let i = 0; i < name.length; i++) {
+            if (listServicewithIns.includes(name[i])) {
+              const packet = {}
+              packet.name = name[i]
+              packet.type = 'TXT'
+              packet.ttl = 120
+              packet.data = []
+              for (let j = 0; j < JSON.parse(txt.get(name[i])).length; j++) {
+                packet.data.push(Buffer.from(JSON.parse(txt.get(name[i]))[j], 'ascii'))
+              }
+              answers.push(packet)
+            }
           }
         }
         if (res.questions.map((element) => { return element.type }).includes('A')) {
@@ -146,12 +121,10 @@ function Bonjour () {
             answers.push(packet)
           }
         }
-        // console.log(info)
         resolve({ answers: answers, additionals: additionals, info: info, QU: QU })
       })
       promise.then(function (full) {
         if (full.QU) {
-          console.log({ answers: full.answers, additionals: full.additionals })
           mdns.respond({ answers: full.answers, additionals: full.additionals }, full.info)
         } else {
           mdns.respond({ answers: full.answers, additionals: full.additionals })

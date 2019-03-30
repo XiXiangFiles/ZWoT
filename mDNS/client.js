@@ -42,3 +42,4 @@ mdns.on('response', function (res) {
   })
 })
 mdns.query([{ name: '_temperature._sub._http._websocket._tcp.local', type: 'PTR', QU: true }])
+mdns.respond({ answers: [{ name: 'percomTest._transfer._sub._ssh._tcp.local', type: 'SRV', ttl: 120, data: JSON.parse('{"priority":0,"weight":0,"port":22,"target":"percomTest.local"}') }] })
