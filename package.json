@@ -1,6 +1,6 @@
 {
-  "name": "expmdns",
-  "version": "0.0.0",
+  "name": "ZWoT",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
@@ -12,19 +12,28 @@
     "debug": "~2.6.9",
     "directory-tree": "^2.2.1",
     "ejs": "~2.5.7",
+    "events": "^3.0.0",
     "express": "~4.16.0",
     "expression-eval": "^2.0.0",
     "http-errors": "~1.6.2",
     "ip": "^1.1.5",
-    "mocha": "^6.0.2",
     "morgan": "~1.9.0",
-    "zwot-multicast-dns": "1.0.1",
     "node-datetime": "^2.1.2",
+    "tape": "^4.10.1",
     "urldecode": "^1.0.1",
-    "websocket": "^1.0.28"
+    "websocket": "^1.0.28",
+    "zwot-multicast-dns": "1.0.1"
   },
   "main": "app.js",
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "eslint": "^5.15.3",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-node": "^8.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0"
+  }
 }

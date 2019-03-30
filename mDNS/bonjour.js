@@ -1,7 +1,7 @@
-const mdns = require('../node_modules/zwot-multicast-dns')()
+const color = require('../node_modules/colors')
 const wtm = require('../wtm')
-
-function Bonjour () {
+const { mdns } = require('./server')
+function bonjour () {
   this.init = function () {
     const ip = require('ip')
     const config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
@@ -30,55 +30,54 @@ function Bonjour () {
     this.listService = listService
     this.srv = srv
     this.txt = txt
-    return { allService: listService, allServiceIns: listServicewithIns, srv: srv, txt: txt, a: config.A }
   }
   this.listen = function () {
     let bonjour = this
-    let config = wtm.getConfig({
-      configPath: '',
-      rootPath: 'public/'
-    })
+    let config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
     mdns.on('query', function (res, info) {
       let listServicewithIns = bonjour.listServicewithIns
       let listService = bonjour.listService
       let srv = bonjour.srv
       let txt = bonjour.txt
       let promise = new Promise(function (resolve, reject) {
+        // const respond = {}
         const answers = []
         const additionals = []
         const QU = res.questions.map(function (element) { return element.QU }).includes(true)
+        console.log(color.green(res.questions.map(function (element) { return element.type })))
+        console.log(color.green())
         if (res.questions.map((element) => { return element.type }).includes('PTR')) {
           if (res.questions.map(function (element) {
-            if (element.type === 'PTR') { return element.name }
+            if (element.type === 'PTR') {
+              return element.name
+            }
           }).includes('_services._dns-sd._udp.local')) {
             for (let i = 0; i < listService.length; i++) {
-              let packet = {}
-              packet.name = '_services._dns-sd._udp.local'
-              packet.type = 'PTR'
-              packet.ttl = 120
-              packet.data = config.Instance + '.' + listService[i]
-              answers.push(packet)
+              let obj = {}
+              obj.name = '_services._dns-sd._udp.local'
+              obj.type = 'PTR'
+              obj.ttl = 120
+              obj.data = config.Instance + '.' + listService[i]
+              answers.push(obj)
             }
           } else if (listService.includes(res.questions.map(function (element) {
             if (element.type === 'PTR') {
               return element.name
             }
           }).toString())) {
-            let packet = {}
-            packet.name = res.questions.map(function (element) {
+            let obj = {}
+            obj.name = res.questions.map(function (element) {
               if (element.type === 'PTR') {
                 return element.name
               }
             }).toString()
-            packet.type = 'PTR'
-            packet.ttl = 120
-            packet.data = config.Instance + '.' + packet.name
-            answers.push(packet)
+            obj.type = 'PTR'
+            obj.ttl = 120
+            obj.data = config.Instance + '.' + obj.name
+            answers.push(obj)
           }
         }
-        if (res.questions.map((element) => {
-          return element.type
-        }).includes('SRV')) {
+        if (res.questions.map((element) => { return element.type }).includes('SRV')) {
           console.log(res.questions.map(function (element) {
             if (element.type === 'SRV') {
               return element.name
@@ -89,69 +88,71 @@ function Bonjour () {
               return element.name
             }
           }).toString())) {
-            let packet = {}
+            let obj = {}
             let serviceSRV = JSON.parse(srv.get(res.questions.map(function (element) {
               if (element.type === 'SRV') {
                 return element.name
               }
             }).toString()))
-            packet.name = res.questions.map(function (element) {
+            obj.name = res.questions.map(function (element) {
               if (element.type === 'SRV') {
                 return element.name
               }
             }).toString()
-            packet.type = 'SRV'
-            packet.ttl = 120
-            packet.data = serviceSRV
-            answers.push(packet)
+            obj.type = 'SRV'
+            obj.ttl = 120
+            obj.data = {}
+            obj.data.port = serviceSRV.port
+            obj.data.weight = serviceSRV.weigth
+            obj.data.priority = serviceSRV.priority
+            obj.data.target = config.A.name
+            answers.push(obj)
           }
         }
-        if (res.questions.map((element) => {
-          return element.type
-        }).includes('TXT')) {
+        if (res.questions.map((element) => { return element.type }).includes('TXT')) {
           if (listServicewithIns.includes(res.questions.map(function (element) {
             if (element.type === 'TXT') {
               return element.name
             }
           }).toString())) {
-            let packet = {}
+            let obj = {}
             let serviceTXT = JSON.parse(txt.get(res.questions.map(function (element) {
               if (element.type === 'TXT') {
                 return element.name
               }
             }).toString()))
-            packet.name = res.questions.map(function (element) {
+            obj.name = res.questions.map(function (element) {
               if (element.type === 'TXT') {
                 return element.name
               }
             }).toString()
-            packet.type = 'TXT'
-            packet.ttl = 120
-            packet.data = []
-            for (let i = 0; i < serviceTXT.length; i++) { packet.data.push(Buffer.from(serviceTXT[i], 'ascii')) }
-
-            answers.push(packet)
+            obj.type = 'TXT'
+            obj.ttl = 120
+            obj.data = []
+            for (let i = 0; i < serviceTXT.length; i++) { obj.data.push(Buffer.from(serviceTXT[i], 'ascii')) }
+            answers.push(obj)
           }
         }
         if (res.questions.map((element) => { return element.type }).includes('A')) {
           if (res.questions.map(function (element) {
-            if (element.type === 'A') { return element.name }
+            if (element.type === 'A') {
+              return element.name
+            }
           }).includes(config.A.name)) {
-            let packet = {}
-            packet.name = config.A.name
-            packet.type = 'A'
-            packet.ttl = 120
-            packet.data = config.A.data
-            packet.flush = true
-            answers.push(packet)
+            let obj = {}
+            obj.name = config.A.name
+            obj.type = 'A'
+            obj.ttl = 120
+            obj.data = config.A.data
+            obj.flush = true
+            answers.push(obj)
           }
         }
-        // console.log(info)
         resolve({ answers: answers, additionals: additionals, info: info, QU: QU })
       })
       promise.then(function (full) {
+        console.log(full)
         if (full.QU) {
-          console.log({ answers: full.answers, additionals: full.additionals })
           mdns.respond({ answers: full.answers, additionals: full.additionals }, full.info)
         } else {
           mdns.respond({ answers: full.answers, additionals: full.additionals })
@@ -160,4 +161,4 @@ function Bonjour () {
     })
   }
 }
-module.exports = new Bonjour()
+exports.bonjour = bonjour
