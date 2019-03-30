@@ -11,7 +11,9 @@ var app = express()
 let mdns = require('./mDNS/server.js')
 app.dnssd = mdns.init()
 mdns.listen()
-
+mdns.on('QU', function(QU) {
+  app.QU = QU
+})
 // set up wtm
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
