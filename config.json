@@ -1,3 +1,4 @@
+    
 {
 	"Instance":"percomTest",
 	"A":{"name":"percomTest.local","data":"192.168.4.222"},
@@ -7,7 +8,7 @@
 			"path":"root/",
 			"description":"Demo service of resarch.",
 			"protocols":["http","tcp"],
-			"SRV":{"port":3000,"weigth":0,"priority":0},
+			"SRV":{"port":3000,"weigth":0,"priority":0, "target": "percomTest.local"},
 			"TXT":["wtm=percomTest"],
 			"values":{},
 			"tags":{}
@@ -18,7 +19,7 @@
 			"path":"root/custom/",
 			"description":"it used to communicate with controller.",
 			"protocols":["ssh","tcp"],
-			"SRV":{"port":22,"weigth":0,"priority":0},
+			"SRV":{"port":22,"weigth":0,"priority":0, "target": "percomTest.local"},
 			"TXT":["username=pi","pwd=testtest"],
 			"values":{},
 			"status":"alive",
@@ -29,7 +30,7 @@
 			"path":"root/properties/",
 			"description":"it is a temperature property",
 			"protocols":["http","websocket","tcp"],
-			"SRV":{"port":3000,"weigth":0,"priority":0},
+			"SRV":{"port":3000,"weigth":0,"priority":0, "target": "percomTest.local"},
 			"TXT":["wtm=percomTest/properties/temperature/0"],
 			"values":{},
 			"status":"none",
@@ -40,7 +41,7 @@
 			"path":"root/actions/",
 			"description":"it is a light actions",
 			"protocols":["http","tcp"],
-			"SRV":{"port":3000,"weigth":0,"priority":0},
+			"SRV":{"port":3000,"weigth":0,"priority":0, "target": "percomTest.local"},
 			"TXT":["wtm=percomTest/actions/light/0"],
 			"values":{},
 			"status":"none",
