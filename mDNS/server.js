@@ -1,8 +1,10 @@
 const mdns = require('../node_modules/zwot-multicast-dns')()
 const color = require('../node_modules/colors')
+const events=require('../node_modules/events')
 const wtm = require('../wtm')
 
 function Bonjour () {
+  events.EventEmitter.call(this)
   this.init = function () {
     const ip = require('ip')
     const config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
@@ -121,16 +123,19 @@ function Bonjour () {
             answers.push(packet)
           }
         }
-        resolve({ answers: answers, additionals: additionals, info: info, QU: QU })
+        resolve({ answers: answers, additionals: additionals, info: info, QU: QU, bonjour: this })
       })
       promise.then(function (full) {
         if (full.QU) {
+	  bonjour.emit('QU', true)
           mdns.respond({ answers: full.answers, additionals: full.additionals }, full.info)
         } else {
+	  bonjour.emit('QU', false)
           mdns.respond({ answers: full.answers, additionals: full.additionals })
         }
       })
     })
   }
 }
+Bonjour.prototype.__proto__=events.EventEmitter.prototype;
 module.exports = new Bonjour()
