@@ -1,6 +1,6 @@
 const mdns = require('../node_modules/zwot-multicast-dns')()
 const color = require('../node_modules/colors')
-const events=require('../node_modules/events')
+const events = require('../node_modules/events')
 const wtm = require('../wtm')
 
 function Bonjour () {
@@ -111,15 +111,13 @@ function Bonjour () {
           }
         }
         if (res.questions.map((element) => { return element.type }).includes('A')) {
-          if (res.questions.map(function (element) {
-            if (element.type === 'A') { return element.name }
-          }).includes(config.A.name)) {
-            let packet = {}
-            packet.name = config.A.name
+          let name = res.questions.map(function (element) { if (element.type === 'A') { return element.name } }).toString().split(',')
+          for (let i = 0; i < name.length; i++) {
+            const packet = {}
+            packet.name = name[i]
             packet.type = 'A'
             packet.ttl = 120
             packet.data = config.A.data
-            packet.flush = true
             answers.push(packet)
           }
         }
@@ -127,15 +125,16 @@ function Bonjour () {
       })
       promise.then(function (full) {
         if (full.QU) {
-	  bonjour.emit('QU', true)
+          bonjour.emit('QU', true)
           mdns.respond({ answers: full.answers, additionals: full.additionals }, full.info)
         } else {
-	  bonjour.emit('QU', false)
+          bonjour.emit('QU', false)
           mdns.respond({ answers: full.answers, additionals: full.additionals })
         }
       })
     })
   }
 }
-Bonjour.prototype.__proto__=events.EventEmitter.prototype;
+// eslint-disable-next-line no-proto
+Bonjour.prototype.__proto__ = events.EventEmitter.prototype
 module.exports = new Bonjour()
