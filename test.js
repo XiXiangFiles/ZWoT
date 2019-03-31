@@ -1,7 +1,13 @@
 const test = require('tape')
 const app = require('./app.js')
 const mDNS = require('zwot-multicast-dns')()
+const color = require('colors')
 
+test('DNS-SD ', function (t) {
+  console.log(color.green(app.dnssd.srv))
+  console.log(color.green(app.dnssd.txt))
+  t.end()
+})
 test('mDNS PTR one question TEST(QM)', function (t) {
   const dnssdQ = []
   const dnssdAns = []
@@ -257,6 +263,43 @@ test('mDNS PTR Service-Discovery TEST(QU)', function (t) {
       mDNS.query([{ name: JSON.parse(app.dnssd.srv.get(packet.answers[0].data)).target, type: 'A', QU: true }])
     })
     mDNS.query([{ name: packet.answers[0].data, type: 'SRV', QU: true }, { name: packet.answers[0].data, type: 'TXT' }])
+  })
+  mDNS.query(dnssdQ)
+})
+test('mDNS PTR Multiple Service-Discovery TEST(QU)', function (t) {
+  let dnssdQ = []
+
+  dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: false })
+  mDNS.once('response', function (packet) {
+    dsnsdQ = []
+    t.equal(app.QU, false, 'QM test')
+    for(let i = 0; i< packet.answers.length; i++){
+      t.same({ name: packet.answers[i].name, type: packet.answers[i].type, data: packet.answers[i].data }, { name: '_services._dns-sd._udp.local', type: 'PTR', data: app.dnssd.allServiceIns[i] }, '_services._dns-sd._udp.local TEST') 
+      dnssdQ.push({ name: packet.answers[i].data, type: 'SRV', QU: false })
+      dnssdQ.push({ name: packet.answers[i].data, type: 'TXT', QU: false })
+    }	  
+    mDNS.once('response', function (packet2) {
+	dnssdQ = []
+    	for (let i = 0; i < packet2.answers.length; i++) {
+	  if ( packet2.answers[i].type === 'SRV') {
+	    t.equal( app.dnssd.allServiceIns.includes(packet2.answers[i].name), true, 'SRV Name TEST' )
+	    t.same( packet2.answers[i].data, JSON.parse(app.dnssd.srv.get(packet2.answers[i].name)), 'SRV Data TEST')
+            dnssdQ.push({ name: packet2.answers[i].data.target, type: 'A', QU: false })
+	  }
+	  if ( packet2.answers[i].type === 'TXT'){
+	    t.equal( app.dnssd.allServiceIns.includes(packet2.answers[i].name), true, 'TXT Name TEST' )
+	    t.same( packet2.answers[i].data.map((txts) => { return txts.toString('utf8')}) , JSON.parse(app.dnssd.txt.get(packet2.answers[i].name)), 'TXT Data TEST')
+	  }
+	}
+        mDNS.once('response', function (packet3) {
+	  for(let i =0; i < packet3.answers.length; i++){
+	    t.same({ name: packet3.answers[i].name, type: packet3.answers[i].type, data: packet3.answers[i].data }, { name: app.dnssd.a.name, type: 'A', data: app.dnssd.a.data }, 'Packet TEST')
+	  }
+	  t.end();
+	})
+        mDNS.query(dnssdQ)
+    })
+    mDNS.query(dnssdQ)
   })
   mDNS.query(dnssdQ)
 })
