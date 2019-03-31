@@ -190,6 +190,38 @@ test('mDNS TXT multiple questions TEST(QU)', function (t) {
   })
   mDNS.query(dnssdQ)
 })
+test('mDNS PTR Service-Discovery TEST(QM)', function (t) {
+  const dnssdQ = []
+  const dnssdAns = []
+
+  dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR' })
+  dnssdAns.push(app.dnssd.allServiceIns[0])
+  mDNS.once('response', function (packet) {
+    t.equal(app.QU, false, 'QM TEST')
+    t.same({ name: packet.answers[0].name, type: packet.answers[0].type, data: packet.answers[0].data }, { name: dnssdQ[0].name, type: 'PTR', data: dnssdAns[0] }, 'Packet TEST')
+    t.end()
+  })
+  mDNS.query(dnssdQ)
+})
+test('mDNS PTR Service-Discovery multiple questions TEST(QM)', function (t) {
+  const dnssdQ = []
+  const dnssdAns = []
+  const allService = app.dnssd.allService
+  for (let i = 0; i < allService.length; i++) {
+    dnssdQ.push({ name: allService[i], type: 'PTR' })
+    dnssdAns.push(app.dnssd.allServiceIns[i])
+  }
+  dnssdQ.push({ name: '*.local', type: 'TXT' })
+  mDNS.once('response', function (packet) {
+    for (let i = 0; i < dnssdAns.length; i++) {
+      t.equal(app.QU, false, 'QM TEST')
+      t.same({ name: packet.answers[i].name, type: packet.answers[i].type, data: packet.answers[i].data }, { name: dnssdQ[i].name, type: 'PTR', data: dnssdAns[i] }, 'Packet TEST')
+    }
+    t.end()
+  })
+  mDNS.query(dnssdQ)
+})
+
 test.onFinish(() => {
   app.destroy()
 })
