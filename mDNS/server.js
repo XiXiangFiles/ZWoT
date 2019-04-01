@@ -23,6 +23,8 @@ function Bonjour () {
           serviceSyntax += `._${service.protocols[j]}`
           if (j === service.protocols.length - 1) { serviceSyntax += '.local' }
         }
+        service.TXT.push(`port=${service.SRV.port}`)
+        service.TXT.push(`ipv4=${config.A.data}`)
         listServicewithIns.push(`${config.Instance}.${serviceSyntax}`)
         srv.set(`${config.Instance}.${serviceSyntax}`, JSON.stringify(service.SRV))
         txt.set(`${config.Instance}.${serviceSyntax}`, JSON.stringify(service.TXT))
