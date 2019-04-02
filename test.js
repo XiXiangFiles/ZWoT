@@ -13,7 +13,6 @@ test('DNS-SD SRV', function (t) {
     t.equal(val.target, app.dnssd.a.name, 'SRV target TEST')
   })
   t.end()
-  console.log(color.green(app.dnssd.txt))
 })
 test('DNS-SD TXT', function (t) {
   app.dnssd.txt.forEach((val, key) => {
@@ -298,7 +297,6 @@ test('mDNS PTR Multiple Service-Discovery TEST(QU)', function (t) {
 
   dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: false })
   mDNS.once('response', function (packet) {
-    dsnsdQ = []
     t.equal(app.QU, false, 'QM test')
     for (let i = 0; i < packet.answers.length; i++) {
       t.same({ name: packet.answers[i].name, type: packet.answers[i].type, data: packet.answers[i].data }, { name: '_services._dns-sd._udp.local', type: 'PTR', data: app.dnssd.allServiceIns[i] }, '_services._dns-sd._udp.local TEST')
@@ -330,7 +328,86 @@ test('mDNS PTR Multiple Service-Discovery TEST(QU)', function (t) {
   })
   mDNS.query(dnssdQ)
 })
-
+test('ZWOT PTR Search (_services._dns-sd._udp.local) TEST (name: "*.local" No Expressions)', function (t) {
+  const dnssdQ = []
+  const dnssdA = []
+  dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
+  dnssdA.push({ name: '*.local', type: 'TXT', data: '' })
+  mDNS.once('response', function (packet) {
+    let discoveryPTR = packet.answers.filter(function (ans) {
+      return ans.type === 'PTR'
+    })
+    let discoveryTXT = packet.answers.filter(function (ans) {
+      return ans.type === 'TXT'
+    })
+    t.equal(packet.answers.length, app.dnssd.allServiceIns.length * 2, 'Packet Answers Length TEST')
+    for (let i = 0; i < discoveryPTR.length; i++) {
+      t.same({ name: discoveryPTR[i].name, type: discoveryPTR[i].type, data: true }, { name: '_services._dns-sd._udp.local', type: 'PTR', data: app.dnssd.allServiceIns.includes(discoveryPTR[i].data) }, 'Packet TEST')
+    }
+    for (let i = 0; i < discoveryTXT.length; i++) {
+      t.same({ name: true, type: discoveryTXT[i].type, data: discoveryTXT[i].data.map((txts) => { return txts.toString('utf8') }) }, { name: app.dnssd.allServiceIns.includes(discoveryTXT[i].name), type: 'TXT', data: JSON.parse(app.dnssd.txt.get(discoveryTXT[i].name)) }, 'Packet TEST')
+    }
+    t.end()
+  })
+  mDNS.query({ questions: dnssdQ, additionals: dnssdA })
+})
+test('ZWOT PTR Search (_services._dns-sd._udp.local) TEST (name: "*.error" No Expressions)', function (t) {
+  const dnssdQ = []
+  const dnssdA = []
+  dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
+  dnssdA.push({ name: '*.error', type: 'TXT', data: '' })
+  mDNS.once('response', function (packet) {
+    t.equal(packet.answers.length, 0, 'Packet Answers Length TEST')
+    t.end()
+  })
+  mDNS.query({ questions: dnssdQ, additionals: dnssdA })
+})
+test('ZWOT PTR Search (_services._dns-sd._udp.local) TEST (name: "_sub.*.local" No Expressions)', function (t) {
+  const dnssdQ = []
+  const dnssdA = []
+  dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
+  dnssdA.push({ name: '_sub.*.local', type: 'TXT', data: '' })
+  mDNS.once('response', function (packet) {
+    let discoveryPTR = packet.answers.filter(function (ans) {
+      return ans.type === 'PTR'
+    })
+    let discoveryTXT = packet.answers.filter(function (ans) {
+      return ans.type === 'TXT'
+    })
+    t.equal(packet.answers.length, app.dnssd.allServiceIns.length * 2, 'Packet Answers Length TEST')
+    for (let i = 0; i < discoveryPTR.length; i++) {
+      t.same({ name: discoveryPTR[i].name, type: discoveryPTR[i].type, data: true }, { name: '_services._dns-sd._udp.local', type: 'PTR', data: app.dnssd.allServiceIns.includes(discoveryPTR[i].data) }, 'Packet TEST')
+    }
+    for (let i = 0; i < discoveryTXT.length; i++) {
+      t.same({ name: true, type: discoveryTXT[i].type, data: discoveryTXT[i].data.map((txts) => { return txts.toString('utf8') }) }, { name: app.dnssd.allServiceIns.includes(discoveryTXT[i].name), type: 'TXT', data: JSON.parse(app.dnssd.txt.get(discoveryTXT[i].name)) }, 'Packet TEST')
+    }
+    t.end()
+  })
+  mDNS.query({ questions: dnssdQ, additionals: dnssdA })
+})
+test('ZWOT PTR Search (_services._dns-sd._udp.local) TEST (name: "_sub.*._tcp.local" No Expressions)', function (t) {
+  const dnssdQ = []
+  const dnssdA = []
+  dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
+  dnssdA.push({ name: '_sub.*._tcp.local', type: 'TXT', data: '' })
+  mDNS.once('response', function (packet) {
+    let discoveryPTR = packet.answers.filter(function (ans) {
+      return ans.type === 'PTR'
+    })
+    let discoveryTXT = packet.answers.filter(function (ans) {
+      return ans.type === 'TXT'
+    })
+    t.equal(packet.answers.length, app.dnssd.allServiceIns.length * 2, 'Packet Answers Length TEST')
+    for (let i = 0; i < discoveryPTR.length; i++) {
+      t.same({ name: discoveryPTR[i].name, type: discoveryPTR[i].type, data: true }, { name: '_services._dns-sd._udp.local', type: 'PTR', data: app.dnssd.allServiceIns.includes(discoveryPTR[i].data) }, 'Packet TEST')
+    }
+    for (let i = 0; i < discoveryTXT.length; i++) {
+      t.same({ name: true, type: discoveryTXT[i].type, data: discoveryTXT[i].data.map((txts) => { return txts.toString('utf8') }) }, { name: app.dnssd.allServiceIns.includes(discoveryTXT[i].name), type: 'TXT', data: JSON.parse(app.dnssd.txt.get(discoveryTXT[i].name)) }, 'Packet TEST')
+    }
+    t.end()
+  })
+  mDNS.query({ questions: dnssdQ, additionals: dnssdA })
+})
 test.onFinish(() => {
   app.destroy()
 })
