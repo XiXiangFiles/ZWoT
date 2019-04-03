@@ -123,6 +123,37 @@ function Bonjour () {
             answers.push(packet)
           }
         }
+        const queryAdditionals = res.additionals.filter((additional) => { return additional.type === 'TXT' })
+        if (queryAdditionals) {
+          try {
+            const star = queryAdditionals[0].name.split('*')
+            const ansFilter = answers.filter((ans) => {
+              let expect = 0
+              let actual = 0
+              if (ans.name === '_services._dns-sd._udp.local') {
+                for (let i = 0; i < star.length; i++) {
+                  let compareStart = star[i].split('.').filter((str) => { return str !== '' })
+                  expect += compareStart.length
+                  for (let j = 0; j < ans.data.split('.').length; j++) {
+                    for (let k = 0; k < compareStart.length; k++) {
+                      if (compareStart[k] === ans.data.split('.')[j]) {
+                        actual++
+                      }
+                    }
+                  }
+                }
+              } else {}
+              return expect === actual
+            })
+            const ansFilterlength = ansFilter.length
+            for (let i = 0; i < ansFilterlength; i++) {
+              (ansFilter[i].name === '_services._dns-sd._udp.local') ? ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) }) : ansFilter.push({ name: ansFilter[i].name, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].name)) })
+            }
+            resolve({ answers: ansFilter, additionals: additionals, info: info, QU: QU, bonjour: this })
+          } catch (e) {
+            // console.error(e)
+          }
+        }
         resolve({ answers: answers, additionals: additionals, info: info, QU: QU, bonjour: this })
       })
       promise.then(function (full) {
@@ -132,6 +163,7 @@ function Bonjour () {
         } else {
           bonjour.emit('QU', false)
           mdns.respond({ answers: full.answers, additionals: full.additionals })
+          // console.log(color.green({ answers: full.answers, additionals: full.additionals }))
         }
       })
     })
