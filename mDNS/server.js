@@ -1,3 +1,4 @@
+
 const mdns = require('../node_modules/zwot-multicast-dns')()
 const color = require('../node_modules/colors')
 const events = require('../node_modules/events')
@@ -126,32 +127,46 @@ function Bonjour () {
         const queryAdditionals = res.additionals.filter((additional) => { return additional.type === 'TXT' })
         if (queryAdditionals) {
           try {
-            const star = queryAdditionals[0].name.split('*')
-            const ansFilter = answers.filter((ans) => {
-              let expect = 0
-              let actual = 0
-              if (ans.name === '_services._dns-sd._udp.local') {
-                for (let i = 0; i < star.length; i++) {
-                  let compareStart = star[i].split('.').filter((str) => { return str !== '' })
-                  expect += compareStart.length
-                  for (let j = 0; j < ans.data.split('.').length; j++) {
-                    for (let k = 0; k < compareStart.length; k++) {
-                      if (compareStart[k] === ans.data.split('.')[j]) {
-                        actual++
+            const ans = new Set()
+            for (let z = 0; z < queryAdditionals.length; z++) {
+              const star = queryAdditionals[z].name.split('*')
+              const ansFilter = answers.filter((ans) => {
+                let expect = 0
+                let actual = 0
+                if (ans.name === '_services._dns-sd._udp.local') {
+                  for (let i = 0; i < star.length; i++) {
+                    let compareStart = star[i].split('.').filter((str) => { return str !== '' })
+                    expect += compareStart.length
+                    for (let j = 0; j < ans.data.split('.').length; j++) {
+                      for (let k = 0; k < compareStart.length; k++) {
+                        if (compareStart[k] === ans.data.split('.')[j]) {
+                          actual++
+                        }
                       }
                     }
                   }
+                } else {}
+                return expect === actual
+              })
+              const ansFilterlength = ansFilter.length
+
+              for (let i = 0; i < ansFilterlength; i++) {
+                ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
+              }
+              for (let h = 0; h < ansFilter.length; h++) {
+                ans.add(JSON.stringify(ansFilter[h]))
+              }
+              if (queryAdditionals.length - 1 === z) {
+                const correctAns = []
+                const sendAns = ans.values()
+                for (let g = 0; g < ans.size; g++) {
+                  correctAns.push(JSON.parse(sendAns.next().value))
                 }
-              } else {}
-              return expect === actual
-            })
-            const ansFilterlength = ansFilter.length
-            for (let i = 0; i < ansFilterlength; i++) {
-              (ansFilter[i].name === '_services._dns-sd._udp.local') ? ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) }) : ansFilter.push({ name: ansFilter[i].name, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].name)) })
+                resolve({ answers: correctAns, additionals: additionals, info: info, QU: QU, bonjour: this })
+              }
             }
-            resolve({ answers: ansFilter, additionals: additionals, info: info, QU: QU, bonjour: this })
-          } catch (e) {
-            // console.error(e)
+          } catch (err) {
+            console.error(color.red(err))
           }
         }
         resolve({ answers: answers, additionals: additionals, info: info, QU: QU, bonjour: this })
@@ -163,7 +178,6 @@ function Bonjour () {
         } else {
           bonjour.emit('QU', false)
           mdns.respond({ answers: full.answers, additionals: full.additionals })
-          // console.log(color.green({ answers: full.answers, additionals: full.additionals }))
         }
       })
     })
