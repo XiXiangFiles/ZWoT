@@ -133,7 +133,7 @@ function Bonjour () {
               const ansFilter = answers.filter((ans) => {
                 let expect = 0
                 let actual = 0
-                if (ans.name === '_services._dns-sd._udp.local') {
+                if (ans.type === 'PTR') {
                   for (let i = 0; i < star.length; i++) {
                     let compareStart = star[i].split('.').filter((str) => { return str !== '' })
                     expect += compareStart.length
@@ -145,11 +145,10 @@ function Bonjour () {
                       }
                     }
                   }
-                } else {}
+                }
                 return expect === actual
               })
               const ansFilterlength = ansFilter.length
-
               for (let i = 0; i < ansFilterlength; i++) {
                 ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
               }

@@ -505,14 +505,14 @@ test('ZWOT PTR Search (_services._dns-sd._udp.local) TEST (name: "_sub.*._websoc
   })
   mDNS.query({ questions: dnssdQ, additionals: dnssdA })
 })
-test('ZWOT PTR Search  TEST No Expressions', function (t) {
+test('ZWOT PTR Search  TEST No Expressions (only on TXT RR)', function (t) {
   const dnssdQ = []
   const dnssdA = []
   const allService = app.dnssd.allService
   for (let i = 0; i < allService.length; i++) {
     dnssdQ.push({ name: allService[i], type: 'PTR' })
-    dnssdA.push({ name: allService[i], type: 'TXT', data: '' })
   }
+  dnssdA.push({ name: allService[0], type: 'TXT', data: '' })
   mDNS.once('response', function (packet) {
     let discoveryPTR = packet.answers.filter(function (ans) {
       return ans.type === 'PTR'
