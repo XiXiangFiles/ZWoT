@@ -1,17 +1,6 @@
 'use strict'
 
-exports.boolExp = function (char) {
-  switch (char) {
-    case '===': return true
-    case '!==': return true
-    case '&&': return true
-    case '||': return true
-    case '<=': return true
-    case '>=': return true
-    default : return false
-  }
-}
-exports.parseOperator = function (char) {
+exports.toOperator = function (char) {
   switch (char) {
     case 'eq': return '==='
     case 'en': return '!=='
@@ -19,8 +8,17 @@ exports.parseOperator = function (char) {
     case 'V': return '||'
     case 'le': return '<='
     case 'ge': return '>='
+    default : return char
   }
 }
-exports.parseValue = function (expression, values) {
-
+exports.toUnfilable = function (char) {
+  switch (char) {
+    case '===': return 'eq'
+    case '!==': return 'en'
+    case '&&': return 'Λ'
+    case '||': return 'V'
+    case '<=': return 'le'
+    case '>=': return 'ge'
+    default : return char
+  }
 }
