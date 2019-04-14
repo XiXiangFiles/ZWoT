@@ -27,11 +27,11 @@ function Unifiable () {
       const res = []
       for (let i = 0; i < Object.keys(object).length; i++) {
         if (char === 'key') {
-          res.push(Object.keys(object)[i])
+          res.push(`"${Object.keys(object)[i]}"`)
         } else {
           const ans = o.get(object[Object.keys(object)[i]], `x.${char}`)
           if (ans) {
-            res.push(ans)
+	    typeof(ans) === 'string'? res.push(`"${ans}"`) : res.push(ans) 
           }
         }
       }
@@ -39,7 +39,7 @@ function Unifiable () {
     }
     function putData (arr, data) {
       for (let i = 0; i < arr.length; i++) {
-        if (arr[i] === undefined) {
+	if (arr[i] === undefined) {
           arr[i] = ''
         }
         if (data[1].length === 0) {
@@ -50,15 +50,17 @@ function Unifiable () {
       }
     }
     const split = expression.split(' ')
-    const ans = new Map()
+    const ans = new Array(split.length)
     for (let i = 0; i < split.length; i++) {
-      const pasrseRes = parse(value, split[i])
-      ans.set(split[i], pasrseRes)
+      const parseRes = parse(value, split[i])
+      ans[i] = parseRes
     }
-    let interatre = ans.entries()
     const finalans = new Array(Object.keys(value).length)
-    for (let j = 0; j < ans.size; j++) {
-      putData(finalans, interatre.next().value)
+    for (let j = 0; j < ans.length; j++) {
+      const input = new Array(2)
+      input[0] = split[j]
+      input[1] = ans[j]
+      putData(finalans, input)
     }
     return finalans
   }
