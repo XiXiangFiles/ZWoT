@@ -2,7 +2,9 @@
 const mdns = require('../node_modules/zwot-multicast-dns')()
 const color = require('../node_modules/colors')
 const events = require('../node_modules/events')
+const expr = require('../node_modules/expression-eval')
 const wtm = require('../wtm')
+const unifiable = require('../unifiable')
 
 function Bonjour () {
   events.EventEmitter.call(this)
@@ -40,10 +42,7 @@ function Bonjour () {
   }
   this.listen = function () {
     let bonjour = this
-    let config = wtm.getConfig({
-      configPath: '',
-      rootPath: 'public/'
-    })
+    let config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
     mdns.on('query', function (res, info) {
       let listServicewithIns = bonjour.listServicewithIns
       let listService = bonjour.listService
@@ -150,17 +149,38 @@ function Bonjour () {
               })
               const ansFilterlength = ansFilter.length
               for (let i = 0; i < ansFilterlength; i++) {
-                ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
+                const flag = unifiable.parseValue(unifiable.encode(res.additionals[z].data.toString('ascii')), config.WoTs).filter((wot) => {
+                  return expr.eval(expr.parse(wot))
+                })
+                if (flag && res.additionals[z].data.toString('ascii').length > 0) {
+                  let expansnum = -1
+                  let parseValue = unifiable.parseValue(unifiable.encode(res.additionals[z].data.toString('ascii')), config.WoTs)
+                  for (let g = 0; g < parseValue.length; g++) {
+                    for (let g1 = 0; g1 < flag.length; g1++) {
+                      if (parseValue[g] === flag[g1]) {
+                        expansnum = g
+                      }
+                    }
+                  }
+                  if (listServicewithIns[expansnum - 1] === ansFilter[i].data) {
+                    ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
+                  }
+                } else {
+                  ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
+                }
               }
               for (let h = 0; h < ansFilter.length; h++) {
                 ans.add(JSON.stringify(ansFilter[h]))
               }
               if (queryAdditionals.length - 1 === z) {
-                const correctAns = []
+                const temp = []
+                let correctAns = []
                 const sendAns = ans.values()
                 for (let g = 0; g < ans.size; g++) {
-                  correctAns.push(JSON.parse(sendAns.next().value))
+                  temp.push(JSON.parse(sendAns.next().value))
                 }
+                correctAns = temp.filter((e) => { if (e.type === 'PTR') { return temp.map((a) => { if (a.type === 'TXT') return a.name }).includes(e.data) } }).concat(correctAns.concat(temp.filter((e) => { if (e.type === 'TXT') { return e } })))
+                correctAns.concat(temp.filter((e) => { if (e.type === 'TXT') { return e } }))
                 resolve({ answers: correctAns, additionals: additionals, info: info, QU: QU, bonjour: this })
               }
             }
