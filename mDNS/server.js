@@ -1,4 +1,3 @@
-
 const mdns = require('../node_modules/zwot-multicast-dns')()
 const color = require('../node_modules/colors')
 const events = require('../node_modules/events')
@@ -148,22 +147,27 @@ function Bonjour () {
                 return expect === actual
               })
               const ansFilterlength = ansFilter.length
-              for (let i = 0; i < ansFilterlength; i++) {
-                const flag = unifiable.parseValue(unifiable.encode(res.additionals[z].data.toString('ascii')), config.WoTs).filter((wot) => {
-                  return expr.eval(expr.parse(wot))
-                })
-                if (flag && res.additionals[z].data.toString('ascii').length > 0) {
-                  let expansnum = -1
-                  let parseValue = unifiable.parseValue(unifiable.encode(res.additionals[z].data.toString('ascii')), config.WoTs)
-                  for (let g = 0; g < parseValue.length; g++) {
-                    for (let g1 = 0; g1 < flag.length; g1++) {
-                      if (parseValue[g] === flag[g1]) {
-                        expansnum = g
-                      }
+              const flag = unifiable.parseValue(unifiable.encode(res.additionals[z].data.toString('ascii')), config.WoTs).filter((wot) => {
+                return expr.eval(expr.parse(wot))
+              })
+              let expansnum = []
+              let parseValue = unifiable.parseValue(unifiable.encode(res.additionals[z].data.toString('ascii')), config.WoTs)
+              for (let g = 0; g < parseValue.length; g++) {
+                for (let g1 = 0; g1 < flag.length; g1++) {
+                  if (parseValue[g] === flag[g1]) {
+                    if (!expansnum.includes(g)) {
+                      expansnum.push(g)
                     }
                   }
-                  if (listServicewithIns[expansnum - 1] === ansFilter[i].data) {
-                    ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
+                }
+              }
+              for (let i = 0; i < ansFilterlength; i++) {
+                if (flag && res.additionals[z].data.toString('ascii').length > 0) {
+                  for (let v = 0; v < expansnum.length; v++) {
+                    if (listServicewithIns[expansnum[v] - 1] === ansFilter[i].data) {
+                      ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
+                      expansnum[v] = -1
+                    }
                   }
                 } else {
                   ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
