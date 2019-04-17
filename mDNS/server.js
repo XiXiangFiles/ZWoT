@@ -147,30 +147,33 @@ function Bonjour () {
                 return expect === actual
               })
               const ansFilterlength = ansFilter.length
-              const flag = unifiable.parseValue(unifiable.encode(res.additionals[z].data.toString('ascii')), config.WoTs).filter((wot) => {
-                return expr.eval(expr.parse(wot))
-              })
-              let expansnum = []
-              let parseValue = unifiable.parseValue(unifiable.encode(res.additionals[z].data.toString('ascii')), config.WoTs)
-              for (let g = 0; g < parseValue.length; g++) {
-                for (let g1 = 0; g1 < flag.length; g1++) {
-                  if (parseValue[g] === flag[g1]) {
-                    if (!expansnum.includes(g)) {
-                      expansnum.push(g)
+              res.additionals[z].data = res.additionals[z].data.map((e) => { return e.toString('utf8').replace('exp =', '') })
+              for (let x = 0; x < res.additionals[z].data.length; x++) {
+                const flag = unifiable.parseValue(unifiable.encode(res.additionals[z].data[x]), config.WoTs).filter((wot) => {
+                  return expr.eval(expr.parse(wot))
+                })
+                let expansnum = []
+                let parseValue = unifiable.parseValue(unifiable.encode(res.additionals[z].data[x]), config.WoTs)
+                for (let g = 0; g < parseValue.length; g++) {
+                  for (let g1 = 0; g1 < flag.length; g1++) {
+                    if (parseValue[g] === flag[g1]) {
+                      if (!expansnum.includes(g)) {
+                        expansnum.push(g)
+                      }
                     }
                   }
                 }
-              }
-              for (let i = 0; i < ansFilterlength; i++) {
-                if (flag && res.additionals[z].data.toString('ascii').length > 0) {
-                  for (let v = 0; v < expansnum.length; v++) {
-                    if (listServicewithIns[expansnum[v] - 1] === ansFilter[i].data) {
-                      ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
-                      expansnum[v] = -1
+                for (let i = 0; i < ansFilterlength; i++) {
+                  if (flag && res.additionals[z].data[x].length > 0) {
+                    for (let v = 0; v < expansnum.length; v++) {
+                      if (listServicewithIns[expansnum[v] - 1] === ansFilter[i].data) {
+                        ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
+                        expansnum[v] = -1
+                      }
                     }
+                  } else {
+                    ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
                   }
-                } else {
-                  ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
                 }
               }
               for (let h = 0; h < ansFilter.length; h++) {
