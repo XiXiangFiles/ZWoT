@@ -60,7 +60,7 @@ function Bonjour () {
               packet.name = '_services._dns-sd._udp.local'
               packet.type = 'PTR'
               packet.ttl = 120
-              packet.data = config.Instance + '.' + listService[i]
+              packet.data = listService[i]
               answers.push(packet)
             }
           } else {
