@@ -169,10 +169,17 @@ function Bonjour () {
                       if (listServicewithIns[expansnum[v] - 1] === ansFilter[i].data) {
                         ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
                         expansnum[v] = -1
+                      } else if (listService[expansnum[v] - 1] === ansFilter[i].data) {
+                        ansFilter.push({ name: listServicewithIns[expansnum[v] - 1], type: 'TXT', ttl: 120, data: JSON.parse(txt.get(listServicewithIns[expansnum[v] - 1])) })
+                        expansnum[v] = -1
                       }
                     }
                   } else {
-                    ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
+                    if (txt.get(ansFilter[i].data)) {
+                      ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
+                    } else if (txt.get(`${config.Instance}.${ansFilter[i].data}`)) {
+                      ansFilter.push({ name: `${config.Instance}.${ansFilter[i].data}`, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(`${config.Instance}.${ansFilter[i].data}`)) })
+                    }
                   }
                 }
               }
@@ -186,7 +193,7 @@ function Bonjour () {
                 for (let g = 0; g < ans.size; g++) {
                   temp.push(JSON.parse(sendAns.next().value))
                 }
-                correctAns = temp.filter((e) => { if (e.type === 'PTR') { return temp.map((a) => { if (a.type === 'TXT') return a.name }).includes(e.data) } }).concat(correctAns.concat(temp.filter((e) => { if (e.type === 'TXT') { return e } })))
+                correctAns = temp.filter((e) => { if (e.type === 'PTR') { return temp.map((a) => { if (a.type === 'TXT') return a.name }).includes(e.data) || temp.map((a) => { if (a.type === 'TXT') return a.name }).includes(`${config.Instance}.${e.data}`) } }).concat(correctAns.concat(temp.filter((e) => { if (e.type === 'TXT') { return e } })))
                 correctAns.concat(temp.filter((e) => { if (e.type === 'TXT') { return e } }))
                 resolve({ answers: correctAns, additionals: additionals, info: info, QU: QU, bonjour: this })
               }
