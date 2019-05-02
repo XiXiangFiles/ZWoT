@@ -5,7 +5,6 @@ exports.get = function (object, exp) {
       // eslint-disable-next-line no-eval
       return eval(exp.replace(`${theKey}`, 'object'))
     } catch (err) {
-      console.error(err)
       return undefined
     }
   } else {

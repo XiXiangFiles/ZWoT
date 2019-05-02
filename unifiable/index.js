@@ -31,7 +31,7 @@ function Unifiable () {
         } else {
           const ans = o.get(object[Object.keys(object)[i]], `x.${char}`)
           if (ans) {
-	    typeof(ans) === 'string'? res.push(`"${ans}"`) : res.push(ans) 
+            typeof (ans) === 'string' ? res.push(`"${ans}"`) : res.push(ans)
           }
         }
       }
@@ -39,7 +39,7 @@ function Unifiable () {
     }
     function putData (arr, data) {
       for (let i = 0; i < arr.length; i++) {
-	if (arr[i] === undefined) {
+        if (arr[i] === undefined) {
           arr[i] = ''
         }
         if (data[1].length === 0) {
