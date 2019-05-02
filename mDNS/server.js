@@ -4,6 +4,7 @@ const events = require('../node_modules/events')
 const expr = require('../node_modules/expression-eval')
 const wtm = require('../wtm')
 const unifiable = require('../unifiable')
+const now = require("date-now")
 
 function Bonjour () {
   events.EventEmitter.call(this)
@@ -39,6 +40,46 @@ function Bonjour () {
     this.txt = txt
     return { allService: listService, allServiceIns: listServicewithIns, srv: srv, txt: txt, a: config.A }
   }
+  this.probe = function() {
+    function probe(){
+      const config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
+      const t1 = now()
+      mdns.once('reponse',function(res, info) {
+        const t2 = now()
+        if (t2 - t1 < 420 ){
+    	  const ans = res.answers
+          for(let i = 0; i < res.answers.length; i++){
+            if(ans[i].type === 'A' && ans.data ===  config.A.name ){
+              config.Instance = config.Instance + now()
+              config.A.name = config.Instance
+              wtm.updateConfig({configPath:'', config:config})
+              return true 
+            }
+          }
+        }
+      })
+      mdns.query({type:'ANY', data: config.A.name})
+      console.log({type:'ANY', data: config.A.name})
+    }
+   while(true){
+     let flag = 0
+     let promise = new Promise(function(resolve){
+       resolve(probe())
+     })
+     promise.then(function(full){
+       if(full){
+        if (flag > 0){
+	  flag--
+	}
+       }else {
+       	if(++flag === 3){
+	  return true
+	}
+       }
+     })	   
+   } 
+  }
+    
   this.listen = function () {
     let bonjour = this
     let config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
@@ -120,6 +161,19 @@ function Bonjour () {
             packet.ttl = 120
             packet.data = config.A.data
             answers.push(packet)
+          }
+        }
+	if (res.questions.map((element) => { return element.type }).includes('ANY')) {
+          let name = res.questions.map(function (element) { if (element.type === 'ANY') { return element.name } }).toString().split(',')
+          for (let i = 0; i < name.length; i++) {
+            const packet = {}
+            packet.name = name[i]
+            packet.type = 'A'
+            packet.ttl = 120
+            packet.data = config.A.data
+            if(name[i] === config.A.name){
+              answers.push(packet)
+	    }
           }
         }
         const queryAdditionals = res.additionals.filter((additional) => { return additional.type === 'TXT' })
