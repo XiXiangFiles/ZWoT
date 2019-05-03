@@ -66,7 +66,9 @@ test('Unifiable Expression TEST', function (t) {
   t.ok(unifiable.parseValue('key eq "_light" Λ status eq "alive"', wtm.getConfig({ configPath: '' }).WoTs), 'Parse Value Test')
   t.end()
 })
+
 test('mDNS PTR one question TEST(QM)', function (t) {
+  
   const dnssdQ = []
   const dnssdAns = []
 
@@ -77,7 +79,8 @@ test('mDNS PTR one question TEST(QM)', function (t) {
     t.same({ name: packet.answers[0].name, type: packet.answers[0].type, data: packet.answers[0].data }, { name: dnssdQ[0].name, type: 'PTR', data: dnssdAns[0] }, 'Packet TEST')
     t.end()
   })
-  mDNS.query(dnssdQ)
+  
+  setTimeout(function(){mDNS.query(dnssdQ)},1000)
 })
 test('mDNS SRV one question TEST(QM)', function (t) {
   const dnssdQ = []

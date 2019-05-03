@@ -47,8 +47,9 @@ function Bonjour () {
         return new Promise(function (resolve) {
           const config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
           const t1 = now()
-          mdns.once('reponse', function (res, info) {
+          mdns.once('response', function (res, info) {
             const t2 = now()
+            console.log(t2 - t1)
             if (t2 - t1 < 420) {
               const ans = res.answers
               for (let i = 0; i < res.answers.length; i++) {
