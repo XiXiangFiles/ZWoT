@@ -42,6 +42,7 @@ function Bonjour () {
   }
   this.probe = function () {
     let flag = 0
+    const start = now()
     async function probe () {
       function probe () {
         return new Promise(function (resolve) {
@@ -50,12 +51,25 @@ function Bonjour () {
           mdns.once('response', function (res, info) {
             const t2 = now()
             console.log(t2 - t1)
-            if (t2 - t1 < 420) {
+            if (t2 - t1 < 12000) {
               const ans = res.answers
+              console.log(ans)
               for (let i = 0; i < res.answers.length; i++) {
-                if (ans[i].type === 'A' && ans.data === config.A.name) {
-                  config.Instance = config.Instance + now()
-                  config.A.name = config.Instance
+                if (ans[i].type === 'A' && ans[i].name === config.A.name) {
+                  const time = now()
+                  const temp = config.Instance
+                  config.Instance = config.Instance + time
+                  config.A.name = `${config.Instance}.local`
+                  for (let j = 0; j < Object.keys(config.WoTs).length; j++) {
+                    if (Object.keys(config.WoTs)[j] === temp) {
+                      config.WoTs[config.Instance] = config.WoTs[Object.keys(config.WoTs)[j]]
+                      console.log(config.WoTs[Object.keys(config.WoTs)[j]])
+                      delete config.WoTs[Object.keys(config.WoTs)[j]]
+                    }
+                    try {
+                      config.WoTs[Object.keys(config.WoTs)[j]].SRV.target = config.A.name
+                    } catch (e) {}
+                  }
                   wtm.updateConfig({ configPath: '', config: config })
                   resolve(true)
                 }
@@ -63,7 +77,7 @@ function Bonjour () {
             }
           })
           while (true) {
-            if (now() - t1 > 420) {
+            if (now() - t1 > 2000) {
               resolve(false)
               break
             }
@@ -71,7 +85,6 @@ function Bonjour () {
           mdns.query([{ name: config.A.name, type: 'ANY' }])
           mdns.query([{ name: config.A.name, type: 'ANY' }])
           mdns.query([{ name: config.A.name, type: 'ANY' }])
-          console.log([{ name: config.A.name, type: 'ANY' }])
         })
       }
       probe().then(function (full) {
@@ -82,7 +95,7 @@ function Bonjour () {
         }
       })
     }
-    while (flag < 3) {
+    while (flag < 3 && now() - start < 70000) {
       if (probe()) {
         flag++
       } else {
