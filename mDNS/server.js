@@ -42,42 +42,41 @@ function Bonjour () {
   }
   this.probe = function() {
     function probe(){
-      const config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
-      const t1 = now()
-      mdns.once('reponse',function(res, info) {
-        const t2 = now()
-        if (t2 - t1 < 420 ){
-    	  const ans = res.answers
-          for(let i = 0; i < res.answers.length; i++){
-            if(ans[i].type === 'A' && ans.data ===  config.A.name ){
-              config.Instance = config.Instance + now()
-              config.A.name = config.Instance
-              wtm.updateConfig({configPath:'', config:config})
-              return true 
+      return new Promise(function(resolve){
+        const config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
+        const t1 = now()
+        mdns.once('reponse',function(res, info) {
+          const t2 = now()
+          if (t2 - t1 < 420 ){
+    	    const ans = res.answers
+            for(let i = 0; i < res.answers.length; i++){
+              if(ans[i].type === 'A' && ans.data ===  config.A.name ){
+                config.Instance = config.Instance + now()
+                config.A.name = config.Instance
+                wtm.updateConfig({configPath:'', config:config})
+                resolve(true) 
+              }
             }
           }
+        })
+        while(true){
+          if(now()-t1 > 420){
+  	    resolve(false)
+	    break
+          }
         }
-      })
-      mdns.query({type:'ANY', data: config.A.name})
-      console.log({type:'ANY', data: config.A.name})
-    }
-   while(true){
-     let flag = 0
-     let promise = new Promise(function(resolve){
-       resolve(probe())
-     })
-     promise.then(function(full){
-       if(full){
-        if (flag > 0){
-	  flag--
-	}
-       }else {
-       	if(++flag === 3){
-	  return true
-	}
-       }
-     })	   
-   } 
+      mdns.query([{ name: config.A.name, type: 'ANY' }])
+      mdns.query([{ name: config.A.name, type: 'ANY' }])
+      mdns.query([{ name: config.A.name, type: 'ANY' }])
+      }) 
+   }
+   probe().then(function(full){
+     if(full === false){
+       return true
+     }else{
+       return false
+     }
+   })	   
   }
     
   this.listen = function () {

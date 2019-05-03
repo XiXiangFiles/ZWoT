@@ -10,9 +10,10 @@ var app = express()
 
 let mdns = require('./mDNS/server.js')
 app.dnssd = mdns.init()
-if(mdns.probe){
-  mdns.listen()
+if(mdns.probe()){
 }
+
+  mdns.listen()
 mdns.on('QU', function(QU) {
   app.QU = QU
 })
