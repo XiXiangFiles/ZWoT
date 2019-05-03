@@ -4,7 +4,7 @@ const events = require('../node_modules/events')
 const expr = require('../node_modules/expression-eval')
 const wtm = require('../wtm')
 const unifiable = require('../unifiable')
-const now = require("date-now")
+const now = require('date-now')
 
 function Bonjour () {
   events.EventEmitter.call(this)
@@ -40,45 +40,59 @@ function Bonjour () {
     this.txt = txt
     return { allService: listService, allServiceIns: listServicewithIns, srv: srv, txt: txt, a: config.A }
   }
-  this.probe = function() {
-    function probe(){
-      return new Promise(function(resolve){
-        const config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
-        const t1 = now()
-        mdns.once('reponse',function(res, info) {
-          const t2 = now()
-          if (t2 - t1 < 420 ){
-    	    const ans = res.answers
-            for(let i = 0; i < res.answers.length; i++){
-              if(ans[i].type === 'A' && ans.data ===  config.A.name ){
-                config.Instance = config.Instance + now()
-                config.A.name = config.Instance
-                wtm.updateConfig({configPath:'', config:config})
-                resolve(true) 
+  this.probe = function () {
+    let flag = 0
+    async function probe () {
+      function probe () {
+        return new Promise(function (resolve) {
+          const config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
+          const t1 = now()
+          mdns.once('reponse', function (res, info) {
+            const t2 = now()
+            if (t2 - t1 < 420) {
+              const ans = res.answers
+              for (let i = 0; i < res.answers.length; i++) {
+                if (ans[i].type === 'A' && ans.data === config.A.name) {
+                  config.Instance = config.Instance + now()
+                  config.A.name = config.Instance
+                  wtm.updateConfig({ configPath: '', config: config })
+                  resolve(true)
+                }
               }
             }
+          })
+          while (true) {
+            if (now() - t1 > 420) {
+              resolve(false)
+              break
+            }
           }
+          mdns.query([{ name: config.A.name, type: 'ANY' }])
+          mdns.query([{ name: config.A.name, type: 'ANY' }])
+          mdns.query([{ name: config.A.name, type: 'ANY' }])
+          console.log([{ name: config.A.name, type: 'ANY' }])
         })
-        while(true){
-          if(now()-t1 > 420){
-  	    resolve(false)
-	    break
-          }
+      }
+      probe().then(function (full) {
+        if (full === false) {
+          flag++
+        } else {
+          flag--
         }
-      mdns.query([{ name: config.A.name, type: 'ANY' }])
-      mdns.query([{ name: config.A.name, type: 'ANY' }])
-      mdns.query([{ name: config.A.name, type: 'ANY' }])
-      }) 
-   }
-   probe().then(function(full){
-     if(full === false){
-       return true
-     }else{
-       return false
-     }
-   })	   
+      })
+    }
+    while (flag < 3) {
+      if (probe()) {
+        flag++
+      } else {
+        if (flag > 0) {
+          flag--
+        }
+      }
+    }
+    return true
   }
-    
+
   this.listen = function () {
     let bonjour = this
     let config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
@@ -162,7 +176,7 @@ function Bonjour () {
             answers.push(packet)
           }
         }
-	if (res.questions.map((element) => { return element.type }).includes('ANY')) {
+        if (res.questions.map((element) => { return element.type }).includes('ANY')) {
           let name = res.questions.map(function (element) { if (element.type === 'ANY') { return element.name } }).toString().split(',')
           for (let i = 0; i < name.length; i++) {
             const packet = {}
@@ -170,9 +184,9 @@ function Bonjour () {
             packet.type = 'A'
             packet.ttl = 120
             packet.data = config.A.data
-            if(name[i] === config.A.name){
+            if (name[i] === config.A.name) {
               answers.push(packet)
-	    }
+            }
           }
         }
         const queryAdditionals = res.additionals.filter((additional) => { return additional.type === 'TXT' })
