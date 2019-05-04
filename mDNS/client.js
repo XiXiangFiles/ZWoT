@@ -1,45 +1,68 @@
-const mdns = require('../node_modules/zwot-multicast-dns')()
-let queryque = new Set()
-mdns.on('response', function (res) {
-  console.log(res.answers)
-  let promise = new Promise(function (resolve, reject) {
-    let arr = []
-    if (res.answers.map(function (answer) { return answer.type }).includes('SRV')) {
-      for (let i = 0; i < res.answers.length; i++) {
-        if (res.answers[i].type === 'SRV' && queryque.has(res.answers[i].name)) {
-          mdns.query([{ name: res.answers[i].data.target, type: 'A' }])
-          console.log({ name: res.answers[i].data.target, type: 'A' })
-          queryque.delete(res.answers[i].name)
-        }
+const mDNS = require('../node_modules/zwot-multicast-dns')()
+const process = require('process')
+const pidusage = require('../node_modules/pidusage')
+const fs = require('fs')
+const color = require('../node_modules/colors')
+const filename = process.argv[2]
+if (filename) {
+
+} else {
+  console.log('please input filename')
+  process.exit()
+}
+let count = 0
+async function saveLog () {
+  setInterval(function () {
+    pidusage(process.pid, function (_err, stats) {
+      try {
+        fs.appendFileSync(`${filename}.csv`, `${stats.cpu},${stats.memory}\n`)
+      } catch (e) {
+        fs.writeFileSync(`${filename}.csv`, `${stats.cpu},${stats.memory}`)
+      }
+    })
+  }, 1)
+}
+let ptrcount = 0
+let ptrcompare = 0
+let dnssdQ = []
+mDNS.on('response', function (packet) {
+  dnssdQ = []
+  const ptr = packet.answers.filter((e) => { if (e.type === 'PTR') { return e } })
+  const srv = packet.answers.filter((e) => { if (e.type === 'SRV') { return e } })
+  if (ptr) {
+    for (let i = 0; i < ptr.length; i++) {
+      if (ptr[i].name === '_services._dns-sd._udp.local') {
+        dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'PTR', QU: false })
+        ptrcount++
+      } else {
+        dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false })
+        dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false })
+        ptrcount++
       }
     }
-    if (res.answers.map(function (answer) { return answer.type }).includes('PTR')) {
-      for (let i = 0; i < res.answers.length; i++) {
-        if (res.answers[i].type === 'PTR') {
-          arr.push(res.answers[i].data)
-          arr.push('PTR')
-          arr.push('SRV')
-          arr.push('TXT')
-          arr.push('A')
-          resolve(arr)
-        }
+  }
+  if (srv) {
+    for (let i = 0; i < srv.length; i++) {
+      dnssdQ.push({ name: srv[i].data.target, type: 'A', QU: false })
+    }
+  }
+  if (dnssdQ.length > 0) {
+    mDNS.query(dnssdQ)
+    ptrcompare += ptr.length
+    console.log(color.red(ptrcount))
+    console.log(color.red(ptrcompare))
+    if (ptrcount === ptrcompare) {
+      console.log(dnssdQ)
+      mDNS.query(dnssdQ)
+      ptrcount = 0
+      ptrcompare = 0
+      console.log(count)
+      if (count++ === 15) {
+        setTimeout(() => { process.exit() }, 1000)
       }
     }
-  })
-  promise.then(function (full) {
-    let name = full[0]
-    for (let i = 1; i < full.length; i++) {
-      if (full[i] === 'SRV') {
-        queryque.add(name)
-        console.log({ name: name, type: 'SRV' })
-        mdns.query([{ name: name, type: 'SRV' }])
-      }
-      if (full[i] === 'TXT') {
-        mdns.query([{ name: name, type: 'TXT' }])
-        console.log({ name: name, type: 'TXT' })
-      }
-    }
-  })
+  }
 })
-mdns.query([{ name: '_temperature._sub._http._websocket._tcp.local', type: 'PTR', QU: true }])
-mdns.respond({ answers: [{ name: 'percomTest._transfer._sub._ssh._tcp.local', type: 'SRV', ttl: 120, data: JSON.parse('{"priority":0,"weight":0,"port":22,"target":"percomTest.local"}') }] })
+dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: false })
+mDNS.query(dnssdQ)
+saveLog()
