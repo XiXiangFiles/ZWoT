@@ -9,12 +9,12 @@ var indexRouter = require('./routes/index')
 var app = express()
 
 let mdns = require('./mDNS/server.js')
-if (mdns.probe()) {
-  setTimeout(() => {
-    app.dnssd = mdns.init()
-    mdns.listen()
-  }, 1000)
-}
+// if (mdns.probe()) {
+// setTimeout(() => { 
+app.dnssd = mdns.init()
+mdns.listen()
+// }, 1000)
+// }
 mdns.on('QU', function (QU) {
   app.QU = QU
 })
