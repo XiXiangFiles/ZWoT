@@ -10,4 +10,4 @@ for (let i = 0; i < Object.keys(config.WoTs).length; i++) {
   } catch (e) {
   }
 }
-console.log(JSON.stringify(config))
+fs.writeFileSync('config.json', JSON.stringify(config))
