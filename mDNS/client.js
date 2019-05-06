@@ -3,6 +3,7 @@ const process = require('process')
 const pidusage = require('../node_modules/pidusage')
 const fs = require('fs')
 const color = require('../node_modules/colors')
+const now = require('date-now')
 const filename = process.argv[2]
 if (filename) {
 
@@ -23,9 +24,9 @@ async function saveLog () {
   setTimeout(() => {}, 100)
 }
 let dnssdQ = []
+let timeup
 mDNS.on('response', function (packet) {
   dnssdQ = []
-  
   const ptr = packet.answers.filter((e) => { if (e.type === 'PTR') { return e } })
   const srv = packet.answers.filter((e) => { if (e.type === 'SRV') { return e } })
   if (ptr) {
@@ -45,11 +46,13 @@ mDNS.on('response', function (packet) {
   }
   if (dnssdQ.length > 0) {
     mDNS.query(dnssdQ)
-    // console.log(dnssdQ)
+    console.log(dnssdQ)
     setTimeout(() => { process.exit() }, 2500)
   }
   saveLog()
+  timeup = now()
 })
 saveLog()
 dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: false })
 mDNS.query(dnssdQ)
+setInterval(() => { if ((timeup + 500) < now()) { process.exit() } }, 500)
