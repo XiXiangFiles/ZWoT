@@ -46,8 +46,7 @@ mDNS.on('response', function (packet) {
   }
   if (dnssdQ.length > 0) {
     mDNS.query(dnssdQ)
-    console.log(dnssdQ)
-    setTimeout(() => { process.exit() }, 2500)
+    // console.log(dnssdQ)
   }
   saveLog()
   timeup = now()
@@ -55,4 +54,4 @@ mDNS.on('response', function (packet) {
 saveLog()
 dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: false })
 mDNS.query(dnssdQ)
-setInterval(() => { if ((timeup + 500) < now()) { process.exit() } }, 500)
+setInterval(() => { if ((timeup + 500) < now()) { process.exit() } }, 100)
