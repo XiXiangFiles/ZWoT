@@ -10,10 +10,10 @@ for (let i = 0; i < Object.keys(config.WoTs).length; i++) {
     config.WoTs[Object.keys(config.WoTs)[i]].SRV.target = config.A.name
     if (oldInstance === Object.keys(config.WoTs)[i]) {
       config.WoTs[config.Instance] = config.WoTs[Object.keys(config.WoTs)[i]]
-      delete config.WoTs[oldInstance]
     }
   } catch (e) {
   }
 }
+delete config.WoTs[oldInstance]
 console.log(JSON.stringify(config))
 fs.writeFileSync('config.json', JSON.stringify(config))
