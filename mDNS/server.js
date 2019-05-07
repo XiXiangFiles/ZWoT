@@ -180,15 +180,21 @@ function Bonjour () {
         }
         if (res.questions.map((element) => { return element.type }).includes('A')) {
           let name = res.questions.map(function (element) { if (element.type === 'A') { return element.name } }).toString().split(',')
+          console.log(name)
+          console.log(config.A.name)
+
           for (let i = 0; i < name.length; i++) {
-            const packet = {}
-            packet.name = name[i]
-            packet.type = 'A'
-            packet.ttl = 120
-            packet.data = config.A.data
-            answers.push(packet)
+            if (name[i] === config.A.name) {
+              const packet = {}
+              packet.name = name[i]
+              packet.type = 'A'
+              packet.ttl = 120
+              packet.data = config.A.data
+              answers.push(packet)
+            }
           }
         }
+
         if (res.questions.map((element) => { return element.type }).includes('ANY')) {
           let name = res.questions.map(function (element) { if (element.type === 'ANY') { return element.name } }).toString().split(',')
           for (let i = 0; i < name.length; i++) {
