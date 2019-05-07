@@ -39,28 +39,28 @@ mDNS.on('response', function (packet) {
           dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'PTR', QU: false })
         }
       } else {
-        if (!set.has(JSON.stringify(dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false })))) {
+        if (!set.has(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false }))) {
           set.add(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false }))
           dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false })
         }
-        if (!set.has(JSON.stringify(dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false })))) {
-          set.add(JSON.stringify(dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false })))
-          dnssdQ.push(dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false }))
+        if (!set.has(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false }))) {
+          set.add(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false }))
+          dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false })
         }
       }
     }
   }
   if (srv) {
     for (let i = 0; i < srv.length; i++) {
-      if (!set.has(JSON.stringify(dnssdQ.push({ name: srv[i].data.target, type: 'A', QU: false })))) {
-        set.add(JSON.stringify(dnssdQ.push({ name: srv[i].data.target, type: 'A', QU: false })))
-        dnssdQ.push(dnssdQ.push({ name: srv[i].data.target, type: 'A', QU: false }))
+      if (!set.has(JSON.stringify({ name: srv[i].data.target, type: 'A', QU: false }))) {
+        set.add(JSON.stringify({ name: srv[i].data.target, type: 'A', QU: false }))
+        dnssdQ.push({ name: srv[i].data.target, type: 'A', QU: false })
       }
     }
   }
   if (dnssdQ.length > 0) {
     mDNS.query(dnssdQ)
-    // console.log(dnssdQ)
+    console.log(dnssdQ)
   }
   saveLog()
   timeup = now()
