@@ -25,6 +25,8 @@ async function saveLog () {
 }
 let dnssdQ = []
 let timeup
+const set = new Set()
+
 mDNS.on('response', function (packet) {
   dnssdQ = []
   const ptr = packet.answers.filter((e) => { if (e.type === 'PTR') { return e } })
@@ -32,16 +34,28 @@ mDNS.on('response', function (packet) {
   if (ptr) {
     for (let i = 0; i < ptr.length; i++) {
       if (ptr[i].name === '_services._dns-sd._udp.local') {
-        dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'PTR', QU: false })
+        if (!set.has(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'PTR', QU: false }))) {
+          set.add(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'PTR', QU: false }))
+          dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'PTR', QU: false })
+        }
       } else {
-        dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false })
-        dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false })
+        if (!set.has(JSON.stringify(dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false })))) {
+          set.add(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false }))
+          dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false })
+        }
+        if (!set.has(JSON.stringify(dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false })))) {
+          set.add(JSON.stringify(dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false })))
+          dnssdQ.push(dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false }))
+        }
       }
     }
   }
   if (srv) {
     for (let i = 0; i < srv.length; i++) {
-      dnssdQ.push({ name: srv[i].data.target, type: 'A', QU: false })
+      if (!set.has(JSON.stringify(dnssdQ.push({ name: srv[i].data.target, type: 'A', QU: false })))) {
+        set.add(JSON.stringify(dnssdQ.push({ name: srv[i].data.target, type: 'A', QU: false })))
+        dnssdQ.push(dnssdQ.push({ name: srv[i].data.target, type: 'A', QU: false }))
+      }
     }
   }
   if (dnssdQ.length > 0) {
