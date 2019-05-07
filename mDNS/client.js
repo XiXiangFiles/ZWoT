@@ -45,7 +45,7 @@ mDNS.on('response', function (packet) {
         }
         if (!set.has(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false }))) {
           set.add(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false }))
-          dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false })
+          dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false })
         }
       }
     }
