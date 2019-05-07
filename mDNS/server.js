@@ -50,10 +50,8 @@ function Bonjour () {
           const t1 = now()
           mdns.once('response', function (res, info) {
             const t2 = now()
-            console.log(t2 - t1)
             if (t2 - t1 < 12000) {
               const ans = res.answers
-              console.log(ans)
               for (let i = 0; i < res.answers.length; i++) {
                 if (ans[i].type === 'A' && ans[i].name === config.A.name) {
                   const time = now()
@@ -63,7 +61,6 @@ function Bonjour () {
                   for (let j = 0; j < Object.keys(config.WoTs).length; j++) {
                     if (Object.keys(config.WoTs)[j] === temp) {
                       config.WoTs[config.Instance] = config.WoTs[Object.keys(config.WoTs)[j]]
-                      console.log(config.WoTs[Object.keys(config.WoTs)[j]])
                       delete config.WoTs[Object.keys(config.WoTs)[j]]
                     }
                     try {
@@ -95,12 +92,14 @@ function Bonjour () {
         }
       })
     }
-    while (flag < 3 && now() - start < 70000) {
-      if (probe()) {
-        flag++
-      } else {
-        if (flag > 0) {
-          flag--
+    while (flag < 3 && now() - start < 100000) {
+      if (flag < 3) {
+        if (probe()) {
+          flag++
+        } else {
+          if (flag > 0) {
+            flag--
+          }
         }
       }
     }
@@ -287,11 +286,16 @@ function Bonjour () {
       })
       promise.then(function (full) {
         if (full.QU) {
-          bonjour.emit('QU', true)
-          mdns.respond({ answers: full.answers, additionals: full.additionals }, full.info)
+          if (full.answers.length > 0) {
+            console.log(full.answers.length)
+            mdns.respond({ answers: full.answers, additionals: full.additionals }, full.info)
+            bonjour.emit('QU', true)
+          }
         } else {
-          bonjour.emit('QU', false)
-          mdns.respond({ answers: full.answers, additionals: full.additionals })
+          if (full.answers.length > 0) {
+            bonjour.emit('QU', false)
+            mdns.respond({ answers: full.answers, additionals: full.additionals })
+          }
         }
       })
     })
