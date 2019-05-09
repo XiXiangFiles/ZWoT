@@ -39,16 +39,16 @@ mDNS.on('response', function (packet) {
       if (ptr[i].name === '_services._dns-sd._udp.local') {
         if (!set.has(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'PTR', QU: false }))) {
           set.add(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'PTR', QU: false }))
-        //   dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'PTR', QU: false })
+          dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'PTR', QU: false })
         }
       } else {
         if (!set.has(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false }))) {
           set.add(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false }))
-        //   dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false })
+          dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'SRV', QU: false })
         }
         if (!set.has(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false }))) {
           set.add(JSON.stringify({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false }))
-        //   dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false })
+          dnssdQ.push({ name: ptr[i].data.toString('utf8'), type: 'TXT', QU: false })
         }
       }
     }
@@ -57,31 +57,31 @@ mDNS.on('response', function (packet) {
     for (let i = 0; i < srv.length; i++) {
       if (!set.has(JSON.stringify({ name: srv[i].data.target, type: 'A', QU: false }))) {
         set.add(JSON.stringify({ name: srv[i].data.target, type: 'A', QU: false }))
-        // dnssdQ.push({ name: srv[i].data.target, type: 'A', QU: false })
+        dnssdQ.push({ name: srv[i].data.target, type: 'A', QU: false })
       }
     }
   }
   if (dnssdQ.length > 0) {
     mDNS.query(dnssdQ)
-    console.log(dnssdQ)
+    // console.log(dnssdQ)
   }
-  try{
-    let ipv4,port,url
-    for(let i = 0; i < txt[1].data.length; i++){
+  try {
+    let ipv4, port, url
+    for (let i = 0; i < txt[1].data.length; i++) {
       let value = txt[1].data[i].toString('utf8')
-      if (value.includes('ipv4=')){ ipv4 = value.split('ipv4=')[1]}
-      if (value.includes('port=')){ port = value.split('port=')[1]}
-      if (value.includes('url=')){ url = value.split('url=')[1]}
+      if (value.includes('ipv4=')) { ipv4 = value.split('ipv4=')[1] }
+      if (value.includes('port=')) { port = value.split('port=')[1] }
+      if (value.includes('url=')) { url = value.split('url=')[1] }
     }
-   timeup = now()
-   request(`http://${ipv4}:${port}/model`, function (_error, response, body) { console.log('body:', body)})
-  }catch(_err){
+    timeup = now()
+    request(`http://${ipv4}:${port}/model`, function (_error, response, body) { console.log('body:', body) })
+  } catch (_err) {
   }
   saveLog()
   timeup = now()
 })
 saveLog()
 dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
-dnssdA.push({ name: '', type: 'TXT', data: '' })
+// dnssdA.push({ name: '', type: 'TXT', data: '' })
 mDNS.query({ questions: dnssdQ, additionals: dnssdA })
-setInterval(() => { if ((timeup + 500) < now()) { process.exit() } }, 100)
+setInterval(() => { if ((timeup + 500) < now()) { process.exit() } }, 1)
