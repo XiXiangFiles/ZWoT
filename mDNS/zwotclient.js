@@ -4,6 +4,7 @@ const pidusage = require('../node_modules/pidusage')
 const fs = require('fs')
 const color = require('../node_modules/colors')
 const now = require('date-now')
+const request = require('../node_modules/request')
 const filename = process.argv[2]
 if (filename) {
 
@@ -32,6 +33,7 @@ mDNS.on('response', function (packet) {
   dnssdQ = []
   const ptr = packet.answers.filter((e) => { if (e.type === 'PTR') { return e } })
   const srv = packet.answers.filter((e) => { if (e.type === 'SRV') { return e } })
+  const txt = packet.answers.filter((e) => { if (e.type === 'TXT') { return e } })
   if (ptr) {
     for (let i = 0; i < ptr.length; i++) {
       if (ptr[i].name === '_services._dns-sd._udp.local') {
@@ -63,11 +65,23 @@ mDNS.on('response', function (packet) {
     mDNS.query(dnssdQ)
     console.log(dnssdQ)
   }
+  try{
+    let ipv4,port,url
+    for(let i = 0; i < txt[1].data.length; i++){
+      let value = txt[1].data[i].toString('utf8')
+      if (value.includes('ipv4=')){ ipv4 = value.split('ipv4=')[1]}
+      if (value.includes('port=')){ port = value.split('port=')[1]}
+      if (value.includes('url=')){ url = value.split('url=')[1]}
+    }
+   timeup = now()
+   request(`http://${ipv4}:${port}/model`, function (_error, response, body) { console.log('body:', body)})
+  }catch(_err){
+  }
   saveLog()
   timeup = now()
 })
 saveLog()
 dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
-dnssdA.push({ name: '_services._dns-sd._udp.local', type: 'TXT', data: '' })
+dnssdA.push({ name: '', type: 'TXT', data: '' })
 mDNS.query({ questions: dnssdQ, additionals: dnssdA })
 setInterval(() => { if ((timeup + 500) < now()) { process.exit() } }, 100)
