@@ -22,6 +22,7 @@
     "morgan": "~1.9.0",
     "node-datetime": "^2.1.2",
     "pidusage": "^2.0.17",
+    "request": "^2.88.0",
     "tape": "^4.10.1",
     "urldecode": "^1.0.1",
     "uuid": "^3.3.2",
