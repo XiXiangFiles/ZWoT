@@ -88,7 +88,7 @@ mDNS.on('response', function (packet) {
 })
 saveLog()
 dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
-dnssdA.push({ name: '_light.*.local', type: 'TXT', data: ['exp = key === "_light1"'] })
+dnssdA.push({ name: '_tv.*.local', type: 'TXT', data: ['exp = key === "_light1"'] })
 mDNS.query({ questions: dnssdQ, additionals: dnssdA })
 setInterval(() => {
   if ((timeup + 500) < now()) {
