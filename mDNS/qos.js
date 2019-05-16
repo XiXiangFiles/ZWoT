@@ -28,12 +28,15 @@ let dnssdQ = []
 let dnssdA = []
 let timeup
 const set = new Set()
-let count = 0
+let count = []
 mDNS.on('response', function (packet) {
   dnssdQ = []
   const ptr = packet.answers.filter((e) => { if (e.type === 'PTR') { return e } })
   const srv = packet.answers.filter((e) => { if (e.type === 'SRV') { return e } })
   const txt = packet.answers.filter((e) => { if (e.type === 'TXT') { return e } })
+  if (txt) {
+    count.push(txt[0])
+  }
   count++
   if (ptr) {
     for (let i = 0; i < ptr.length; i++) {
@@ -85,10 +88,11 @@ mDNS.on('response', function (packet) {
 })
 saveLog()
 dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
-dnssdA.push({ name: '', type: 'TXT', data: ['exp = key === "_tv"'] })
+dnssdA.push({ name: '_light.*.local', type: 'TXT', data: ['exp = key === "_light1"'] })
 mDNS.query({ questions: dnssdQ, additionals: dnssdA })
 setInterval(() => {
   if ((timeup + 500) < now()) {
+    console.log(count.length)
     console.log(count)
     process.exit()
   }
