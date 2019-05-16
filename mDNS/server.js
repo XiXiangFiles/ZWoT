@@ -180,9 +180,6 @@ function Bonjour () {
         }
         if (res.questions.map((element) => { return element.type }).includes('A')) {
           let name = res.questions.map(function (element) { if (element.type === 'A') { return element.name } }).toString().split(',')
-          console.log(name)
-          console.log(config.A.name)
-
           for (let i = 0; i < name.length; i++) {
             if (name[i] === config.A.name) {
               const packet = {}
@@ -252,11 +249,11 @@ function Bonjour () {
                 for (let i = 0; i < ansFilterlength; i++) {
                   if (flag && res.additionals[z].data[x].length > 0) {
                     for (let v = 0; v < expansnum.length; v++) {
-                      if (listServicewithIns[expansnum[v] - 1] === ansFilter[i].data) {
-                        ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
+                      if (listServicewithIns[expansnum[v]] === config.Instance + '.' + ansFilter[i].data) {
+                        ansFilter.push({ name: config.Instance + '.' + ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(config.Instance + '.' + ansFilter[i].data)) })
                         expansnum[v] = -1
-                      } else if (listService[expansnum[v] - 1] === ansFilter[i].data) {
-                        ansFilter.push({ name: listServicewithIns[expansnum[v] - 1], type: 'TXT', ttl: 120, data: JSON.parse(txt.get(listServicewithIns[expansnum[v] - 1])) })
+                      } else if (listService[expansnum[v]] === ansFilter[i].data) {
+                        ansFilter.push({ name: listServicewithIns[expansnum[v]], type: 'TXT', ttl: 120, data: JSON.parse(txt.get(listServicewithIns[expansnum[v]])) })
                         expansnum[v] = -1
                       }
                     }
@@ -293,7 +290,7 @@ function Bonjour () {
       promise.then(function (full) {
         if (full.QU) {
           if (full.answers.length > 0) {
-            console.log(full.answers.length)
+            console.log({ answers: full.answers, additionals: full.additionals })
             mdns.respond({ answers: full.answers, additionals: full.additionals }, full.info)
             bonjour.emit('QU', true)
           }
