@@ -108,8 +108,8 @@ function Bonjour () {
 
   this.listen = function () {
     let bonjour = this
-    let config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
     mdns.on('query', function (res, info) {
+      let config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
       let listServicewithIns = bonjour.listServicewithIns
       let listService = bonjour.listService
       let srv = bonjour.srv
@@ -290,7 +290,7 @@ function Bonjour () {
       promise.then(function (full) {
         if (full.QU) {
           if (full.answers.length > 0) {
-            //console.log({ answers: full.answers, additionals: full.additionals })
+            console.log({ answers: full.answers, additionals: full.additionals })
             mdns.respond({ answers: full.answers, additionals: full.additionals }, full.info)
             bonjour.emit('QU', true)
           }
