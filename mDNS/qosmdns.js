@@ -68,7 +68,7 @@ mDNS.on('response', function (packet) {
     }
   }
   if (dnssdQ.length > 0) {
-    mDNS.query(dnssdQ)
+   // mDNS.query(dnssdQ)
     // console.log(dnssdQ)
   }
   saveLog()
@@ -91,7 +91,7 @@ mDNS.on('response', function (packet) {
 })
 saveLog()
 dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
-dnssdA.push({ name: '_tv.*.local', type: 'TXT', data: [`exp = ${unfi.decode('values.size > 30')}`] })
+//dnssdA.push({ name: '_tv.*.local', type: 'TXT', data: [`exp = ${unfi.decode('values.size > 30')}`] })
 mDNS.query({ questions: dnssdQ, additionals: dnssdA })
 setInterval(() => {
   if ((timeup + 500) < now()) {
