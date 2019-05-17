@@ -110,10 +110,27 @@ function Bonjour () {
     let bonjour = this
     mdns.on('query', function (res, info) {
       let config = wtm.getConfig({ configPath: '', rootPath: 'public/' })
-      let listServicewithIns = bonjour.listServicewithIns
-      let listService = bonjour.listService
-      let srv = bonjour.srv
-      let txt = bonjour.txt
+      const listServicewithIns = []
+      const listService = []
+      const srv = new Map()
+      const txt = new Map()
+      for (let i = 0; i < Object.keys(config.WoTs).length; i++) {
+        if (Object.keys(config.WoTs)[i] !== config.Instance) {
+          let name = Object.keys(config.WoTs)[i]
+          let service = config.WoTs[Object.keys(config.WoTs)[i]]
+          let serviceSyntax = `${name}._sub`
+          for (let j = 0; j < service.protocols.length; j++) {
+            serviceSyntax += `._${service.protocols[j]}`
+            if (j === service.protocols.length - 1) { serviceSyntax += '.local' }
+          }
+          service.TXT.push(`port=${service.SRV.port}`)
+          service.TXT.push(`ipv4=${config.A.data}`)
+          listServicewithIns.push(`${config.Instance}.${serviceSyntax}`)
+          srv.set(`${config.Instance}.${serviceSyntax}`, JSON.stringify(service.SRV))
+          txt.set(`${config.Instance}.${serviceSyntax}`, JSON.stringify(service.TXT))
+          listService.push(serviceSyntax)
+        }
+      }
       let promise = new Promise(function (resolve, reject) {
         const answers = []
         const additionals = []
@@ -234,31 +251,40 @@ function Bonjour () {
               for (let x = 0; x < res.additionals[z].data.length; x++) {
                 const flag = unifiable.parseValue(unifiable.encode(res.additionals[z].data[x]), config.WoTs).filter((wot) => {
                   return expr.eval(expr.parse(wot))
-                })
+                }) // correct answers
+                // console.log(`flag = ${JSON.stringify(flag)}`)
                 let expansnum = []
+                let stype = []
                 let parseValue = unifiable.parseValue(unifiable.encode(res.additionals[z].data[x]), config.WoTs)
                 for (let g = 0; g < parseValue.length; g++) {
                   for (let g1 = 0; g1 < flag.length; g1++) {
                     if (parseValue[g] === flag[g1]) {
                       if (!expansnum.includes(g)) {
                         expansnum.push(g)
+                        stype.push(listService[g - 1])
+                        // console.log(color.red(listService[g - 1]))
                       }
                     }
                   }
                 }
                 for (let i = 0; i < ansFilterlength; i++) {
                   if (flag && res.additionals[z].data[x].length > 0) {
-                    for (let v = 0; v < expansnum.length; v++) {
-                      if (listServicewithIns[expansnum[v]] === config.Instance + '.' + ansFilter[i].data) {
+                    for (let v = 0; v < stype.length; v++) {
+                      if (stype[v] === ansFilter[i].data) {
+                        // console.log(color.green(stype[v]))
+                        // console.log(color.yellow(ansFilter[i].data))
+                        const temp = stype[v]
                         ansFilter.push({ name: config.Instance + '.' + ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(config.Instance + '.' + ansFilter[i].data)) })
-                        expansnum[v] = -1
-                      } else if (listService[expansnum[v]] === ansFilter[i].data) {
+                        stype = stype.filter((e) => { if (e !== temp) { return e } })
+                      } else if (config.Instance + '.' + stype[v] === ansFilter[i].data) {
+                        const temp = stype[v]
                         ansFilter.push({ name: listServicewithIns[expansnum[v]], type: 'TXT', ttl: 120, data: JSON.parse(txt.get(listServicewithIns[expansnum[v]])) })
-                        expansnum[v] = -1
+                        stype = stype.filter((e) => { if (e !== temp) { return e } })
                       }
                     }
                   } else {
                     if (txt.get(ansFilter[i].data)) {
+                      // console.log(color.red(ansFilter[i].data))
                       ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
                     } else if (txt.get(`${config.Instance}.${ansFilter[i].data}`)) {
                       ansFilter.push({ name: `${config.Instance}.${ansFilter[i].data}`, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(`${config.Instance}.${ansFilter[i].data}`)) })
@@ -267,6 +293,7 @@ function Bonjour () {
                 }
               }
               for (let h = 0; h < ansFilter.length; h++) {
+                // console.log(color.gray(`${JSON.stringify(ansFilter[h])}`))
                 ans.add(JSON.stringify(ansFilter[h]))
               }
               if (queryAdditionals.length - 1 === z) {
@@ -290,7 +317,7 @@ function Bonjour () {
       promise.then(function (full) {
         if (full.QU) {
           if (full.answers.length > 0) {
-            console.log({ answers: full.answers, additionals: full.additionals })
+            // console.log({ answers: full.answers, additionals: full.additionals })
             mdns.respond({ answers: full.answers, additionals: full.additionals }, full.info)
             bonjour.emit('QU', true)
           }
