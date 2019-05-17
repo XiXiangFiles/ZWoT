@@ -18,7 +18,9 @@ mdns.listen()
 mdns.on('QU', function (QU) {
   app.QU = QU
 })
+
 /*
+
 let flag = 0
 async function update () {
   delete mdns
@@ -37,6 +39,7 @@ fs.watch('./config.json', { recursive: true }, function (eventType, filename) {
   }
 })
 */
+
 // set up wtm
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
