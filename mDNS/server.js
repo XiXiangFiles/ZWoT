@@ -252,7 +252,6 @@ function Bonjour () {
                 const flag = unifiable.parseValue(unifiable.encode(res.additionals[z].data[x]), config.WoTs).filter((wot) => {
                   return expr.eval(expr.parse(wot))
                 }) // correct answers
-                // console.log(`flag = ${JSON.stringify(flag)}`)
                 let expansnum = []
                 let stype = []
                 let parseValue = unifiable.parseValue(unifiable.encode(res.additionals[z].data[x]), config.WoTs)
@@ -262,7 +261,6 @@ function Bonjour () {
                       if (!expansnum.includes(g)) {
                         expansnum.push(g)
                         stype.push(listService[g - 1])
-                        // console.log(color.red(listService[g - 1]))
                       }
                     }
                   }
@@ -271,8 +269,6 @@ function Bonjour () {
                   if (flag && res.additionals[z].data[x].length > 0) {
                     for (let v = 0; v < stype.length; v++) {
                       if (stype[v] === ansFilter[i].data) {
-                        // console.log(color.green(stype[v]))
-                        // console.log(color.yellow(ansFilter[i].data))
                         const temp = stype[v]
                         ansFilter.push({ name: config.Instance + '.' + ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(config.Instance + '.' + ansFilter[i].data)) })
                         stype = stype.filter((e) => { if (e !== temp) { return e } })
@@ -284,7 +280,6 @@ function Bonjour () {
                     }
                   } else {
                     if (txt.get(ansFilter[i].data)) {
-                      // console.log(color.red(ansFilter[i].data))
                       ansFilter.push({ name: ansFilter[i].data, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(ansFilter[i].data)) })
                     } else if (txt.get(`${config.Instance}.${ansFilter[i].data}`)) {
                       ansFilter.push({ name: `${config.Instance}.${ansFilter[i].data}`, type: 'TXT', ttl: 120, data: JSON.parse(txt.get(`${config.Instance}.${ansFilter[i].data}`)) })
@@ -293,7 +288,6 @@ function Bonjour () {
                 }
               }
               for (let h = 0; h < ansFilter.length; h++) {
-                // console.log(color.gray(`${JSON.stringify(ansFilter[h])}`))
                 ans.add(JSON.stringify(ansFilter[h]))
               }
               if (queryAdditionals.length - 1 === z) {

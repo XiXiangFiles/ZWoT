@@ -31,22 +31,18 @@ function Unifiable () {
         } else {
           const ans = o.get(object[Object.keys(object)[i]], `x.${char}`)
           if (ans) {
-            typeof (ans) === 'string' ? res.push(`"${ans}"`) : res.push(ans)
+            typeof (ans) === 'string' ? res.push(`"${ans}"`) : res.push(`"${ans}"`)
+          } else {
+            res.push(undefined)
           }
         }
       }
       return res
     }
     function putData (arr, data) {
-      for (let i = 0; i < arr.length; i++) {
-        if (arr[i] === undefined) {
-          arr[i] = ''
-        }
-        if (data[1].length === 0) {
-          arr[i] += data[0] + ' '
-        } else {
-          arr[i] += data[1][i % data[1].length] + ' '
-        }
+      const ans = data[1]
+      for (let i = 0; i < ans.length; i++) {
+        ans[i] !== undefined ? arr[i] += `${ans[i]} ` : unifiable.checkOperator(`${data[0]}`) ? arr[i] += `${data[0]} ` : arr[i] += `"${data[0].replace(/"|'/g, '')}" `
       }
     }
     const split = expression.split(' ')
@@ -56,12 +52,16 @@ function Unifiable () {
       ans[i] = parseRes
     }
     const finalans = new Array(Object.keys(value).length)
-    for (let j = 0; j < ans.length; j++) {
+    for (let h = 0; h < finalans.length; h++) {
+      finalans[h] = ''
+    }
+    for (let j = 0; j < ans.length; j++) { // first words, second words
       const input = new Array(2)
-      input[0] = split[j]
-      input[1] = ans[j]
+      input[0] = split[j] // origine word
+      input[1] = ans[j] // ans word
       putData(finalans, input)
     }
+    console.log(finalans)
     return finalans
   }
 }

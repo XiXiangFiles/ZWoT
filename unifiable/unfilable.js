@@ -14,11 +14,26 @@ exports.toOperator = function (char) {
 exports.toUnfilable = function (char) {
   switch (char) {
     case '===': return 'eq'
+    case '==': return 'eq'
     case '!==': return 'en'
+    case '!=': return 'en'
     case '&&': return 'Λ'
     case '||': return 'V'
     case '<=': return 'le'
     case '>=': return 'ge'
     default : return char
+  }
+}
+exports.checkOperator = function (char) {
+  switch (char) {
+    case '===':
+    case '!==':
+    case '==':
+    case '!=':
+    case '&&':
+    case '||':
+    case '<=':
+    case '>=': return true
+    default : return false
   }
 }
