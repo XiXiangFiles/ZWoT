@@ -3,42 +3,18 @@ var express = require('express')
 var path = require('path')
 var cookieParser = require('cookie-parser')
 var logger = require('morgan')
-const fs = require('fs')
 var indexRouter = require('./routes/index')
 
 var app = express()
 
 let mdns = require('./mDNS/server.js')
-// if (mdns.probe()) {
-// setTimeout(() => {
+
 app.dnssd = mdns.init()
 mdns.listen()
-// }, 1000)
-// }
+
 mdns.on('QU', function (QU) {
   app.QU = QU
 })
-
-/*
-
-let flag = 0
-async function update () {
-  delete mdns
-  mdns = require('./mDNS/server.js')
-  app.dnssd = mdns.init()
-  mdns.listen()
-  if (app.dnssd) {
-    flag = 0
-  }
-}
-fs.watch('./config.json', { recursive: true }, function (eventType, filename) {
-  flag++
-  if (flag !== 0) {
-    update()
-    flag--
-  }
-})
-*/
 
 // set up wtm
 app.set('views', path.join(__dirname, 'views'))
