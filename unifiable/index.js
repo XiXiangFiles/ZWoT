@@ -61,7 +61,6 @@ function Unifiable () {
       input[1] = ans[j] // ans word
       putData(finalans, input)
     }
-    console.log(finalans)
     return finalans
   }
 }
