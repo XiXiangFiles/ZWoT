@@ -1,42 +1,27 @@
 const mDNS = require('../node_modules/zwot-multicast-dns')()
 const process = require('process')
-const pidusage = require('../node_modules/pidusage')
-const fs = require('fs')
-const color = require('../node_modules/colors')
 const now = require('date-now')
 const request = require('../node_modules/request')
 const unfi = require('../unifiable')
 const filename = process.argv[2]
-if (filename) {
 
-} else {
-  //console.log('please input filename')
-  //process.exit()
-}
-async function saveLog () {
-  pidusage(process.pid, function (_err, stats) {
-    try {
-      // console.log(`${filename}.csv`, `${stats.cpu},${stats.memory}\n`)
-      fs.appendFileSync(`${filename}.csv`, `${stats.cpu},${stats.memory}\n`)
-    } catch (e) {
-      fs.writeFileSync(`${filename}.csv`, `${stats.cpu},${stats.memory}`)
-      // console.log(`${filename}.csv`, `${stats.cpu},${stats.memory}\n`)
-    }
-  })
-  setTimeout(() => {}, 100)
+function getRandomIntInclusive (min, max) {
+  min = Math.ceil(min)
+  max = Math.floor(max)
+  return Math.floor(Math.random() * (max - min + 1)) + min
 }
 let dnssdQ = []
 let dnssdA = []
 let timeup
 const set = new Set()
-let count = []
+let answer = { size: getRandomIntInclusive(50, 20), ipv4: [] }
 mDNS.on('response', function (packet) {
   dnssdQ = []
   const ptr = packet.answers.filter((e) => { if (e.type === 'PTR') { return e } })
   const srv = packet.answers.filter((e) => { if (e.type === 'SRV') { return e } })
   const txt = packet.answers.filter((e) => { if (e.type === 'TXT') { return e } })
   if (txt.length > 0) {
-    count.push(txt[0].name)
+    txt.filter((e) => { return e.name })
   }
   if (ptr) {
     for (let i = 0; i < ptr.length; i++) {
@@ -67,33 +52,32 @@ mDNS.on('response', function (packet) {
   }
   if (dnssdQ.length > 0) {
     mDNS.query(dnssdQ)
-    // console.log(dnssdQ)
   }
-  saveLog()
   try {
     let ipv4, port, url
-    for (let i = 0; i < txt[1].data.length; i++) {
-      let value = txt[1].data[i].toString('utf8')
+    for (let i = 0; i < txt[0].data.length; i++) {
+      let value = txt[0].data[i].toString('utf8')
       if (value.includes('ipv4=')) { ipv4 = value.split('ipv4=')[1] }
       if (value.includes('port=')) { port = value.split('port=')[1] }
       if (value.includes('url=')) { url = value.split('url=')[1] }
-      // console.log(ipv4)
+      if (ipv4) {
+        answer.ipv4.push(ipv4)
+      }
     }
     request(`http://${ipv4}:${port}/model`, function (_error, response, body) {
-      // console.log('body:', body)
     })
   } catch (_err) {
   }
   timeup = now()
 })
-saveLog()
+
 dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
-dnssdA.push({ name: '_tv.*.local', type: 'TXT', data: [`exp = ${unfi.decode('values.size > 30')}`] })
+dnssdA.push({ name: '_tv.*.local', type: 'TXT', data: [`exp = ${unfi.decode(`values.size === ${answer.size}`)}`] })
+
 mDNS.query({ questions: dnssdQ, additionals: dnssdA })
 setInterval(() => {
   if ((timeup + 500) < now()) {
-    console.log(count.length)
-    console.log(count)
+    console.log(JSON.stringify(answer))
     process.exit()
   }
 }, 400)
