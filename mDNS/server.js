@@ -311,7 +311,7 @@ function Bonjour () {
       promise.then(function (full) {
         if (full.QU) {
           if (full.answers.length > 0) {
-            // console.log({ answers: full.answers, additionals: full.additionals })
+            //console.log({ answers: full.answers, additionals: full.additionals })
             mdns.respond({ answers: full.answers, additionals: full.additionals }, full.info)
             bonjour.emit('QU', true)
           }
