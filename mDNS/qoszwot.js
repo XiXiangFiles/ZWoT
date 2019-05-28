@@ -81,8 +81,8 @@ setInterval(() => {
     process.exit()
   }
 }, 400)
-setTimeout(500, () => {
+setTimeout(() => {
   if (!timeup) {
     timeup = now()
   }
-})
+}, 500)
