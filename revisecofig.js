@@ -19,7 +19,7 @@ request(`http://172.17.0.1:3000/zwot`, function (_error, response, body) {
   }
   delete config.WoTs[oldInstance]
   let wots = {}
-  for (let j = Object.keys(config.WoTs).length; j > 0; j--) {
+  for (let j = Object.keys(config.WoTs).length; j >= 0; j--) {
     wots[Object.keys(config.WoTs)[j]] = config.WoTs[Object.keys(config.WoTs)[j]]
   }
   config.WoTs = wots
