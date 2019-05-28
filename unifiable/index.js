@@ -31,7 +31,7 @@ function Unifiable () {
         } else {
           const ans = o.get(object[Object.keys(object)[i]], `x.${char}`)
           if (ans) {
-            typeof (ans) === 'string' ? res.push(`"${ans}"`) : res.push(`"${ans}"`)
+            typeof (ans) === 'string' ? res.push(`"${ans}"`) : res.push(`${ans}`)
           } else {
             res.push(undefined)
           }
@@ -42,13 +42,31 @@ function Unifiable () {
     function putData (arr, data) {
       const ans = data[1]
       for (let i = 0; i < ans.length; i++) {
-        ans[i] !== undefined ? arr[i] += `${ans[i]} ` : unifiable.checkOperator(`${data[0]}`) ? arr[i] += `${data[0]} ` : arr[i] += `"${data[0].replace(/"|'/g, '')}" `
+        try {
+          if (!unifiable.checkOperator(`${data[0]}`)) {
+            if (data[0].includes('.')) {
+              if (parseFloat(data[0])) {
+                data[0] = parseFloat(data[0])
+              }
+            } else {
+              if (parseFloat(data[0])) {
+                data[0] = parseInt(data[0])
+              }
+            }
+            if (typeof (data[0]) !== 'number' && !data[0].includes('"')) {
+              data[0] = `"${data[0]}"`
+            }
+          } else {
+          }
+        } catch (_err) {
+        }
+        ans[i] !== undefined ? arr[i] += `${ans[i]} ` : unifiable.checkOperator(`${data[0]}`) ? arr[i] += ` ${data[0]} ` : arr[i] += ' ' + data[0]
       }
     }
-    const split = expression.split(' ')
-    const ans = new Array(split.length)
-    for (let i = 0; i < split.length; i++) {
-      const parseRes = parse(value, split[i])
+    const expressionsplit = expression.split(' ')
+    const ans = new Array(expressionsplit.length)
+    for (let i = 0; i < expressionsplit.length; i++) {
+      const parseRes = parse(value, expressionsplit[i])
       ans[i] = parseRes
     }
     const finalans = new Array(Object.keys(value).length)
@@ -57,10 +75,11 @@ function Unifiable () {
     }
     for (let j = 0; j < ans.length; j++) { // first words, second words
       const input = new Array(2)
-      input[0] = split[j] // origine word
+      input[0] = expressionsplit[j] // origine word
       input[1] = ans[j] // ans word
       putData(finalans, input)
     }
+    console.log(finalans)
     return finalans
   }
 }
