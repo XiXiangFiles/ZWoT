@@ -79,25 +79,27 @@ mDNS.query({ questions: dnssdQ, additionals: dnssdA })
 setInterval(function() {
   function record(filename,file){
     try {
-      fs.appendFileSync(`${filename}.csv`, `${stats.cpu},${stats.memory}\n`)
+      fs.appendFileSync(`${filename}.csv`, `${file}\n`)
     } catch (e) {
-      fs.writeFileSync(`${filename}.csv`, `${stats.cpu},${stats.memory}`)
+      fs.writeFileSync(`${filename}.csv`, `${file}`)
     }
   }	 
   let flag = 0
+  console.log(answer)
+  answer.ipv4 = JSON.stringify(answer.ipv4)
   if ((timeup + 500) < now()) {
-    request.post({url:'http://172.17.0.1:3000/precision', form: answer}, function(err,httpResponse,body){
+    request.post({url:'http://172.17.0.1:3000/precision', form:answer}, function(err,httpResponse,body){
       record("precision",body) 
       console.log(`precision = ${body}`)
       flag++
     })
-    request.post({url:'http://172.17.0.1:3000/recall', form: answer}, function(err,httpResponse,body){ 
+    request.post({url:'http://172.17.0.1:3000/recall',  form:answer}, function(err,httpResponse,body){ 
       record("recall",body) 
       console.log(`recall = ${body}`)
+      process.exit()
       flag++
     })
     if (flag === 2) {
-      process.exit()
     }
   }
 }, 400)
