@@ -3,6 +3,7 @@ const process = require('process')
 const now = require('date-now')
 const request = require('../node_modules/request')
 const unfi = require('../unifiable')
+const fs = require('fs')
 const filename = process.argv[2]
 
 function getRandomIntInclusive (min, max) {
@@ -75,15 +76,24 @@ dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
 dnssdA.push({ name: '*.local', type: 'TXT', data: [`exp = ${unfi.decode(`values.size === ${answer.size}`)}`] })
 
 mDNS.query({ questions: dnssdQ, additionals: dnssdA })
-setInterval(() => {
+setInterval(function() {
+  function record(filename,file){
+    try {
+      fs.appendFileSync(`${filename}.csv`, `${stats.cpu},${stats.memory}\n`)
+    } catch (e) {
+      fs.writeFileSync(`${filename}.csv`, `${stats.cpu},${stats.memory}`)
+    }
+  }	 
   let flag = 0
   if ((timeup + 500) < now()) {
     request.post({url:'http://172.17.0.1:3000/precision', form: answer}, function(err,httpResponse,body){
-      console.log(body)
+      record("precision",body) 
+      console.log(`precision = ${body}`)
       flag++
     })
-    request.post({url:'http://172.17.0.1:3000/recall', form: answer}, function(err,httpResponse,body){
-      console.log(body)
+    request.post({url:'http://172.17.0.1:3000/recall', form: answer}, function(err,httpResponse,body){ 
+      record("recall",body) 
+      console.log(`recall = ${body}`)
       flag++
     })
     if (flag === 2) {
