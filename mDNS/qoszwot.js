@@ -76,9 +76,19 @@ dnssdA.push({ name: '*.local', type: 'TXT', data: [`exp = ${unfi.decode(`values.
 
 mDNS.query({ questions: dnssdQ, additionals: dnssdA })
 setInterval(() => {
+  let flag = 0
   if ((timeup + 500) < now()) {
-    console.log(JSON.stringify(answer))
-    process.exit()
+    request.post({url:'http://172.17.0.1:3000/precision', form: answer}, function(err,httpResponse,body){
+      console.log(body)
+      flag++
+    })
+    request.post({url:'http://172.17.0.1:3000/recall', form: answer}, function(err,httpResponse,body){
+      console.log(body)
+      flag++
+    })
+    if (flag === 2) {
+      process.exit()
+    }
   }
 }, 400)
 setTimeout(() => {
