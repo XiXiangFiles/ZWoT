@@ -72,7 +72,7 @@ mDNS.on('response', function (packet) {
 })
 
 dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
-dnssdA.push({ name: '*.local', type: 'TXT', data: [`exp = ${unfi.decode(`values.size === 30`)}`] })
+dnssdA.push({ name: '*.local', type: 'TXT', data: [`exp = ${unfi.decode(`values.size === 22`)}`] })
 
 mDNS.query({ questions: dnssdQ, additionals: dnssdA })
 setInterval(() => {
@@ -81,3 +81,8 @@ setInterval(() => {
     process.exit()
   }
 }, 400)
+setTimeout(500, () => {
+  if (!timeup) {
+    timeup = now()
+  }
+})
