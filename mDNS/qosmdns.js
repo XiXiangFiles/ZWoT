@@ -58,9 +58,35 @@ dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
 //dnssdA.push({ name: '_tv.*.local', type: 'TXT', data: [`exp = ${unfi.decode(`values.size === ${answer.size}`)}`] })
 
 mDNS.query({ questions: dnssdQ, additionals: dnssdA })
-setInterval(() => {
-  if ((timeup + 500) < now()) {
-    console.log(JSON.stringify(answer))
-    process.exit()
+setTimeout(function() {
+  function record(filename,file){
+    try {
+      fs.appendFileSync(`${filename}.csv`, `${file}\n`)
+    } catch (e) {
+      fs.writeFileSync(`${filename}.csv`, `${file}`)
+    }
+  }	 
+  let flag = 0
+  console.log(answer)
+  answer.ipv4 = JSON.stringify(answer.ipv4)
+  if ((timeup ) < now()) {
+    request.post({url:'http://172.17.0.1:3000/precision', form:answer}, function(err,httpResponse,body){
+      record("precision",body) 
+      console.log(`precision = ${body}`)
+      flag++
+    })
+    request.post({url:'http://172.17.0.1:3000/recall',  form:answer}, function(err,httpResponse,body){ 
+      record("recall",body) 
+      console.log(`recall = ${body}`)
+      process.exit()
+      flag++
+    })
+    if (flag === 2) {
+    }
   }
 }, 400)
+setTimeout(() => {
+  if (!timeup) {
+    timeup = now()
+  }
+}, 100)
