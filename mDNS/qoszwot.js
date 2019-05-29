@@ -76,7 +76,7 @@ dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
 dnssdA.push({ name: '*.local', type: 'TXT', data: [`exp = ${unfi.decode(`values.size === ${answer.size}`)}`] })
 
 mDNS.query({ questions: dnssdQ, additionals: dnssdA })
-setInterval(function() {
+setTimeout(function() {
   function record(filename,file){
     try {
       fs.appendFileSync(`${filename}.csv`, `${file}\n`)
@@ -87,7 +87,7 @@ setInterval(function() {
   let flag = 0
   console.log(answer)
   answer.ipv4 = JSON.stringify(answer.ipv4)
-  if ((timeup + 500) < now()) {
+  if ((timeup ) < now()) {
     request.post({url:'http://172.17.0.1:3000/precision', form:answer}, function(err,httpResponse,body){
       record("precision",body) 
       console.log(`precision = ${body}`)
@@ -107,4 +107,4 @@ setTimeout(() => {
   if (!timeup) {
     timeup = now()
   }
-}, 500)
+}, 100)
