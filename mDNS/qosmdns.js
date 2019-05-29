@@ -3,6 +3,7 @@ const process = require('process')
 const now = require('date-now')
 const request = require('../node_modules/request')
 const unfi = require('../unifiable')
+const fs = require('fs')
 const filename = process.argv[2]
 
 function getRandomIntInclusive (min, max) {
