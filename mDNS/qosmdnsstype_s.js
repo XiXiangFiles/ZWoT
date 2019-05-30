@@ -79,12 +79,12 @@ setTimeout(function() {
   answer.ipv4 = JSON.stringify(answer.ipv4)
   if ((timeup ) < now()) {
     request.post({url:'http://172.17.0.1:3000/precisionStype', form:answer}, function(err,httpResponse,body){
-      record("mdnsScanprecision",body) 
+      record("mdnsstyperecision",body) 
       console.log(`precision = ${body}`)
       flag++
     })
     request.post({url:'http://172.17.0.1:3000/recallStype',  form:answer}, function(err,httpResponse,body){ 
-      record("mdnsScanrecall",body) 
+      record("mdnsstyperecall",body) 
       console.log(`recall = ${body}`)
       process.exit()
       flag++

@@ -15,11 +15,11 @@ if (filename) {
 async function saveLog () {
   pidusage(process.pid, function (_err, stats) {
     try {
-      console.log(`${filename}.csv`, `${stats.cpu},${stats.memory}\n`)
+//      console.log(`${filename}.csv`, `${stats.cpu},${stats.memory}\n`)
       fs.appendFileSync(`${filename}.csv`, `${stats.cpu},${stats.memory}\n`)
     } catch (e) {
       fs.writeFileSync(`${filename}.csv`, `${stats.cpu},${stats.memory}`)
-      console.log(`${filename}.csv`, `${stats.cpu},${stats.memory}\n`)
+//      console.log(`${filename}.csv`, `${stats.cpu},${stats.memory}\n`)
     }
   })
   setTimeout(() => {}, 100)
@@ -63,7 +63,7 @@ mDNS.on('response', function (packet) {
   }
   if (dnssdQ.length > 0) {
     mDNS.query(dnssdQ)
-    // console.log(dnssdQ)
+    console.log(dnssdQ)
   }
   try {
     let ipv4, port, url
