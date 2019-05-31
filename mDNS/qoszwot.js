@@ -73,7 +73,7 @@ mDNS.on('response', function (packet) {
 })
 
 dnssdQ.push({ name: '_services._dns-sd._udp.local', type: 'PTR', QU: true })
-dnssdA.push({ name: '*.local', type: 'TXT', data: [`exp = ${unfi.decode(`values.size === ${answer.size}`)}`] })
+dnssdA.push({ name: '_tv.*.local', type: 'TXT', data: [`exp = ${unfi.decode(`values.size === ${answer.size}`)}`] })
 
 mDNS.query({ questions: dnssdQ, additionals: dnssdA })
 setTimeout(function() {
@@ -89,12 +89,12 @@ setTimeout(function() {
   answer.ipv4 = JSON.stringify(answer.ipv4)
   if ((timeup ) < now()) {
     request.post({url:'http://172.17.0.1:3000/precision', form:answer}, function(err,httpResponse,body){
-      record("precision",body) 
+      record("zwotprecision",body) 
       console.log(`precision = ${body}`)
       flag++
     })
     request.post({url:'http://172.17.0.1:3000/recall',  form:answer}, function(err,httpResponse,body){ 
-      record("recall",body) 
+      record("zwotrecall",body) 
       console.log(`recall = ${body}`)
       process.exit()
       flag++
