@@ -1,7 +1,7 @@
 # ZWoT Implement
 ###### tags: `Master Thesis Code`
 * Introduction
-    * It depends on mdns/dns-sd mechinsm and optimize the performance.
+    * It depends on mdns/dns-sd mechanism and optimizes the performance.
         * Packet traffic
             * Decrease packet amounts from n^2 to n
         * Unifiable Expression
